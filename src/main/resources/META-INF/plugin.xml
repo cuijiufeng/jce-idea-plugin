@@ -1,0 +1,25 @@
+<idea-plugin>
+    <id>cn.cjf.jce-idea-plugin</id>
+    <name>JCE</name>
+    <vendor email="1310639453@qq.com" url="https://github.com/cuijiufeng">personal</vendor>
+
+    <description>
+        <![CDATA[
+        ========================================
+        这是一个JCE idea快捷工具
+        ========================================
+        ]]>
+    </description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
