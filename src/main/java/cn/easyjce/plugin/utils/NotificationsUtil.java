@@ -4,10 +4,6 @@ import cn.easyjce.plugin.global.PluginConstants;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import org.apache.commons.lang3.StringUtils;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @Class: MessageUtil
@@ -16,11 +12,11 @@ import java.nio.charset.StandardCharsets;
  */
 public class NotificationsUtil {
 
-    public static void showNotice(NotificationType level, String content, String ... args) {
+    public static void showNotice(NotificationType level, String content, Object ... args) {
         Notifications.Bus.notify(new Notification(
                 PluginConstants.NOTIFICATION_GROUP,
                 "Tip",
-                MessagesUtil.getMessage(content, args),
+                MessagesUtil.getI18nMessage(content, args),
                 level));
     }
 }

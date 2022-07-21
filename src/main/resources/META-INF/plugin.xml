@@ -17,10 +17,15 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <toolWindow id="jce" anchor="right" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
+        <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
+        <group id="jce.toolbar">
+            <action id="reset.action" class="cn.easyjce.plugin.actions.ResetAction"/>
+            <separator text="Separator"/>
+            <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
+        </group>
     </actions>
 </idea-plugin>

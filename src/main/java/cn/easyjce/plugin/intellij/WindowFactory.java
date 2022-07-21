@@ -1,5 +1,6 @@
 package cn.easyjce.plugin.intellij;
 
+import cn.easyjce.plugin.ui.ToolWindowPanel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
@@ -17,7 +18,7 @@ public class WindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        Content content = contentFactory.createContent(new MainPanel(project, toolWindow), "", false);
+        Content content = contentFactory.createContent(new ToolWindowPanel(project, toolWindow), "", false);
         toolWindow.getContentManager().addContent(content);
     }
 }
