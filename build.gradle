@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.intellij' version '0.4.26'
 }
 
-group 'cn.cjf'
+group 'cn.easyjce.plugin'
 version '1.0-SNAPSHOT'
 
 repositories {

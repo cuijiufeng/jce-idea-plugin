@@ -1,13 +1,13 @@
 <idea-plugin>
-    <id>cn.cjf.jce-idea-plugin</id>
+    <id>jce-idea-plugin</id>
     <name>JCE</name>
     <vendor email="1310639453@qq.com" url="https://github.com/cuijiufeng">personal</vendor>
 
     <description>
         <![CDATA[
-        ========================================
+        ========================================</br>
         这是一个JCE idea快捷工具
-        ========================================
+        ========================================</br>
         ]]>
     </description>
 
@@ -17,6 +17,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <toolWindow id="jce" anchor="right" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
     </extensions>
 
     <actions>
