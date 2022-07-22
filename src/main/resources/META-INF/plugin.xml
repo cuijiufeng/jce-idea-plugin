@@ -18,6 +18,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
+        <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.JceServiceImpl"/>
     </extensions>
 
     <actions>

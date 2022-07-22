@@ -1,10 +1,9 @@
 package cn.easyjce.plugin.ui;
 
-import cn.easyjce.plugin.service.JceServiceImpl;
+import cn.easyjce.plugin.service.impl.JceServiceImpl;
 import cn.easyjce.plugin.swt.GBC;
 import cn.easyjce.plugin.utils.MessagesUtil;
-import cn.easyjce.plugin.utils.NotificationsUtil;
-import com.intellij.notification.NotificationType;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.wm.ToolWindow;
@@ -18,7 +17,6 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.security.Provider;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -34,7 +32,7 @@ public class MainPanel extends JPanel {
     public MainPanel(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         super(new BorderLayout());
 
-        JceServiceImpl jceService = new JceServiceImpl();
+        JceServiceImpl jceService = ServiceManager.getService(JceServiceImpl.class);
         ProviderCombo[] providers = Arrays.stream(jceService.getProviders())
                 .map(ProviderCombo::new)
                 .sorted()

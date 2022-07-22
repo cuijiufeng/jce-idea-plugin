@@ -16,10 +16,15 @@ public interface PluginConstants {
     /**
      * 通知分组
      */
-    String NOTIFICATION_GROUP = "notification group";
+    String NOTIFICATION_GROUP = "jce.notify";
 
     /**
      * toolbar id
      */
     String TOOL_BAR_ID = "jce.toolbar";
+
+    /**
+     * toolbar id
+     */
+    String SETTING_FILE = "jce.toolbar";
 }

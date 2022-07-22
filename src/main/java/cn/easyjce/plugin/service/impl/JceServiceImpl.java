@@ -1,4 +1,4 @@
-package cn.easyjce.plugin.service;
+package cn.easyjce.plugin.service.impl;
 
 import java.security.Provider;
 import java.security.Security;
@@ -11,7 +11,7 @@ import java.util.List;
  * @Date: 2022/7/22 13:49
  * @author: cuijiufeng
  */
-public class JceServiceImpl {
+public final class JceServiceImpl {
     private Provider[] providers = Security.getProviders();
 
     public JceServiceImpl() {
