@@ -1,4 +1,4 @@
-package cn.easyjce.plugin.swt;
+package cn.easyjce.plugin.awt;
 
 import com.intellij.util.ui.JBUI;
 

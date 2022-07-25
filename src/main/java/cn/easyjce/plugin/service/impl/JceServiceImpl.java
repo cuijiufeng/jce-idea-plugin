@@ -12,17 +12,8 @@ import java.util.List;
  * @author: cuijiufeng
  */
 public final class JceServiceImpl {
-    private Provider[] providers = Security.getProviders();
-
-    public JceServiceImpl() {
-        reloadProviders();
-    }
-
-    public void reloadProviders() {
-        providers = Security.getProviders();
-    }
 
     public Provider[] getProviders() {
-        return providers;
+        return Security.getProviders();
     }
 }

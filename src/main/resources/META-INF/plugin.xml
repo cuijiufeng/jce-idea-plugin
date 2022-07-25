@@ -17,6 +17,9 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <applicationService serviceImplementation="cn.easyjce.plugin.configuration.JcePluginSetting"/>
+        <applicationConfigurable groupId="other" id="jce.configuration" instance="cn.easyjce.plugin.configuration.JcePluginConfiguration"/>
+        <!--TODO 为什么写IconsUtil.PLUGIN报错-->
         <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
         <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.JceServiceImpl"/>
     </extensions>
@@ -26,6 +29,7 @@
         <group id="jce.toolbar">
             <action id="reset.action" class="cn.easyjce.plugin.actions.ResetAction"/>
             <separator text="Separator"/>
+            <action id="config.action" class="cn.easyjce.plugin.actions.ConfigAction"/>
             <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
         </group>
     </actions>

@@ -25,12 +25,12 @@ public class ToolWindowPanel extends JPanel {
         super(new BorderLayout());
 
         //将toolbar添加到toolwindow面板上
-        AnAction action = ActionManager.getInstance().getAction(PluginConstants.SETTING_FILE);
+        AnAction action = ActionManager.getInstance().getAction(PluginConstants.TOOL_BAR_ID);
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, ((ActionGroup) action), true);
         this.add(actionToolbar.getComponent(), BorderLayout.NORTH);
 
         //添加主体ui
-        this.add(new MainPanel(project, toolWindow), BorderLayout.CENTER);
+        this.add(MainPanel.getInstance(), BorderLayout.CENTER);
 
         NotificationsUtil.showNotice(NotificationType.INFORMATION, "welcome");
     }

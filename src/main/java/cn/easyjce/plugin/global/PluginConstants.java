@@ -24,7 +24,12 @@ public interface PluginConstants {
     String TOOL_BAR_ID = "jce.toolbar";
 
     /**
-     * toolbar id
+     * setting file
      */
-    String SETTING_FILE = "jce.toolbar";
+    String SETTING_FILE = "jce.persistent";
+
+    /**
+     * config name
+     */
+    String CONFIG_NAME = "JCE Plugin";
 }
