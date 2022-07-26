@@ -1,19 +1,11 @@
 package cn.easyjce.plugin.ui;
 
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
-import cn.easyjce.plugin.awt.GBC;
-import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.ComboBox;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.JBSplitter;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBTextArea;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,30 +14,34 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * @Class: MainPanel
- * @Date: 2022/7/21 16:58
+ * @Class: MainUI
+ * @Date: 2022/7/26 9:39
  * @author: cuijiufeng
  */
-public class MainPanel extends JPanel {
-    private static final MainPanel SINGLETON = new MainPanel();
-    private final ComboBox<ProviderCombo> providerSelect = new ComboBox<>();
-    private final ComboBox<TypeCombo> typeSelect = new ComboBox<>();
-    private final ComboBox<AlgorithmCombo> algorithmSelect = new ComboBox<>();
-    private final JBTextArea input = new JBTextArea();
-    private final JBLabel output = new JBLabel();
-    private final JButton compute = new JButton(MessagesUtil.getI18nMessage("compute"));
-    private final JButton clear = new JButton(MessagesUtil.getI18nMessage("clear"));
+public class MainUI {
+    private static final MainUI SINGLETON = new MainUI();
+    private JPanel mainPanel;
+    private JComboBox<ProviderCombo> providerSelect;
+    private JComboBox<TypeCombo> typeSelect;
+    private JComboBox<AlgorithmCombo> algorithmSelect;
+    private JButton compute;
+    private JButton clear;
+    private JTextArea input;
+    private JLabel output;
+    private JSplitPane splitter;
 
-    private MainPanel() {
-        super(new BorderLayout());
-
+    private MainUI() {
         initView();
         initEvent();
         reloadProviderSelect(ServiceManager.getService(JceServiceImpl.class).getProviders());
     }
 
-    public static MainPanel getInstance() {
+    public static MainUI getInstance() {
         return SINGLETON;
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 
     public void reset() {
@@ -79,39 +75,6 @@ public class MainPanel extends JPanel {
     }
 
     private void initView() {
-        JPanel top = new JPanel(new GridBagLayout());
-
-        JPanel provider = new JPanel(new BorderLayout());
-        provider.add(new JBLabel(MessagesUtil.getI18nMessage("algorithm provider") + ":"), BorderLayout.WEST);
-        provider.add(providerSelect, BorderLayout.CENTER);
-        top.add(provider, new GBC(0, 0, 1, 2));
-
-        JPanel type = new JPanel(new BorderLayout());
-        type.add(new JBLabel(MessagesUtil.getI18nMessage("type") + ":"), BorderLayout.WEST);
-        type.add(typeSelect, BorderLayout.CENTER);
-        top.add(type, new GBC(0, 2, 1, 2));
-
-        JPanel algorithm = new JPanel(new BorderLayout());
-        algorithm.add(new JBLabel(MessagesUtil.getI18nMessage("algorithm") + ":"), BorderLayout.WEST);
-        algorithm.add(algorithmSelect, BorderLayout.CENTER);
-        top.add(algorithm, new GBC(0, 4, 1, 2));
-
-        //分割线
-        top.add(new JSeparator(), new GBC(0, 6, 1, 1));
-
-        JPanel button = new JPanel(new BorderLayout());
-        button.add(clear, BorderLayout.WEST);
-        button.add(compute, BorderLayout.EAST);
-        top.add(button, new GBC(0, 7, 1, 2));
-
-        this.add(top, BorderLayout.NORTH);
-
-        JBSplitter jbSplitter = new JBSplitter(true);
-        //jbSplitter.setBorder(JBUI.Borders.empty(30));
-        jbSplitter.setFirstComponent(input);
-        output.setVerticalAlignment(SwingConstants.TOP);
-        jbSplitter.setSecondComponent(output);
-        this.add(jbSplitter, BorderLayout.CENTER);
     }
 
     private void initEvent() {
@@ -160,7 +123,7 @@ public class MainPanel extends JPanel {
             return name;
         }
         @Override
-        public int compareTo(@NotNull MainPanel.ProviderCombo o) {
+        public int compareTo(@NotNull ProviderCombo o) {
             return name.compareTo(o.name);
         }
     }
@@ -187,7 +150,7 @@ public class MainPanel extends JPanel {
             return Objects.hashCode(type);
         }
         @Override
-        public int compareTo(@NotNull MainPanel.TypeCombo o) {
+        public int compareTo(@NotNull TypeCombo o) {
             return type.compareTo(o.type);
         }
     }
@@ -214,7 +177,7 @@ public class MainPanel extends JPanel {
             return Objects.hashCode(algorithm);
         }
         @Override
-        public int compareTo(@NotNull MainPanel.AlgorithmCombo o) {
+        public int compareTo(@NotNull AlgorithmCombo o) {
             return algorithm.compareTo(o.algorithm);
         }
     }

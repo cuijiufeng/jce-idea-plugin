@@ -30,7 +30,7 @@ public class ToolWindowPanel extends JPanel {
         this.add(actionToolbar.getComponent(), BorderLayout.NORTH);
 
         //添加主体ui
-        this.add(MainPanel.getInstance(), BorderLayout.CENTER);
+        this.add(MainUI.getInstance().getMainPanel(), BorderLayout.CENTER);
 
         NotificationsUtil.showNotice(NotificationType.INFORMATION, "welcome");
     }

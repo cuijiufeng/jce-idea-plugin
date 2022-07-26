@@ -1,7 +1,6 @@
 package cn.easyjce.plugin.configuration;
 
 import cn.easyjce.plugin.global.PluginConstants;
-import cn.easyjce.plugin.ui.MainPanel;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;

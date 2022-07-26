@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.actions;
 
-import cn.easyjce.plugin.ui.MainPanel;
+import cn.easyjce.plugin.ui.MainUI;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -19,6 +19,6 @@ public class ResetAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        MainPanel.getInstance().reset();
+        MainUI.getInstance().reset();
     }
 }
