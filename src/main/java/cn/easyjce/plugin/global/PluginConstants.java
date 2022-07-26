@@ -32,4 +32,11 @@ public interface PluginConstants {
      * config name
      */
     String CONFIG_NAME = "JCE Plugin";
+
+    interface CacheKey {
+        String CONFIG_INPUT_RB_HEX = "config.input.radio.button.hex";
+        String CONFIG_INPUT_RB_BASE64 = "config.input.radio.button.base64";
+        String CONFIG_OUTPUT_RB_HEX = "config.output.radio.button.hex";
+        String CONFIG_OUTPUT_RB_BASE64 = "config.output.radio.button.base64";
+    }
 }
