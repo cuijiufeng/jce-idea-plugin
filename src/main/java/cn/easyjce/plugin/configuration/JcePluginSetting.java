@@ -1,7 +1,5 @@
 package cn.easyjce.plugin.configuration;
 
-import cn.easyjce.plugin.beans.Cache;
-import cn.easyjce.plugin.beans.SelectionCache;
 import cn.easyjce.plugin.global.PluginConstants;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
@@ -11,10 +9,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

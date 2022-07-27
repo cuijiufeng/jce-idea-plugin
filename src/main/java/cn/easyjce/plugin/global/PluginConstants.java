@@ -1,7 +1,5 @@
 package cn.easyjce.plugin.global;
 
-import cn.easyjce.plugin.utils.MessagesUtil;
-
 /**
  * @Class: PluginConstants
  * @Date: 2022/7/20 17:54

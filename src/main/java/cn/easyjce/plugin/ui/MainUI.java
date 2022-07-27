@@ -1,8 +1,11 @@
 package cn.easyjce.plugin.ui;
 
+import cn.easyjce.plugin.awt.GBC;
+import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.ui.JBSplitter;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -11,6 +14,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.security.Provider;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -19,6 +24,8 @@ import java.util.Objects;
  * @author: cuijiufeng
  */
 public class MainUI {
+    public static final int PARAM_ROW_MAX_COUNT = 4;
+    public static final int PARAM_COL_MAX_WIDTH = 4;
     private static final MainUI SINGLETON = new MainUI();
     private JPanel mainPanel;
     private JComboBox<ProviderCombo> providerSelect;
@@ -27,8 +34,9 @@ public class MainUI {
     private JButton compute;
     private JButton clear;
     private JTextArea input;
-    private JLabel output;
+    private JTextArea output;
     private JSplitPane splitter;
+    private JPanel params;
 
     private MainUI() {
         initView();
@@ -88,6 +96,16 @@ public class MainUI {
             if (ItemEvent.SELECTED == event.getStateChange()) {
                 TypeCombo item = (TypeCombo) event.getItem();
                 reloadAlgorithmSelect(item.provider, item.type);
+                params.removeAll();
+                try {
+                    for (int i = 0; i < JceSpec.valueOf(item.type).params().size(); i++) {
+                        String label = JceSpec.valueOf(item.type).params().get(i);
+                        params.add(new JBLabel(label + ":"), new GBC((i% PARAM_ROW_MAX_COUNT)* PARAM_COL_MAX_WIDTH, i/ PARAM_ROW_MAX_COUNT, 1, 1));
+                        params.add(new JBTextField(), new GBC((i% PARAM_ROW_MAX_COUNT)* PARAM_COL_MAX_WIDTH +1, i/ PARAM_ROW_MAX_COUNT, PARAM_COL_MAX_WIDTH - 1, 1));
+                    }
+                } catch (IllegalArgumentException e) {
+                    //ignore 没有参数
+                }
             }
         });
         algorithmSelect.addItemListener(event -> {
@@ -103,10 +121,21 @@ public class MainUI {
             }
         });
         compute.addMouseListener(new MouseAdapter() {
+            @SuppressWarnings("all")
             @Override
             public void mouseClicked(MouseEvent e) {
-                input.setText("input");
-                output.setText("output");
+                ProviderCombo providerSelected = (ProviderCombo) providerSelect.getSelectedItem();
+                TypeCombo typeSelected = (TypeCombo) typeSelect.getSelectedItem();
+                AlgorithmCombo algoSelected = (AlgorithmCombo) algorithmSelect.getSelectedItem();
+                Map<String, String> paramsMap = new HashMap<>(8);
+                //获取参数
+                for (int i = 0; i < params.getComponents().length; i+=2) {
+                    String key = ((JLabel) params.getComponents()[i]).getText().replaceAll(":", "");
+                    String val = ((JTextField) params.getComponents()[i + 1]).getText();
+                    paramsMap.put(key, val);
+                }
+                output.setText(ServiceManager.getService(JceServiceImpl.class)
+                        .execute(typeSelected.type, algoSelected.algorithm, providerSelected.provider, input.getText(), paramsMap));
             }
         });
     }

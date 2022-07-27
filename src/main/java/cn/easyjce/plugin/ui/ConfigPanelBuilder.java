@@ -1,14 +1,11 @@
 package cn.easyjce.plugin.ui;
 
-import cn.easyjce.plugin.beans.Cache;
-import cn.easyjce.plugin.beans.SelectionCache;
 import cn.easyjce.plugin.configuration.JcePluginSetting;
 import cn.easyjce.plugin.global.PluginConstants;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.util.ui.FormBuilder;
 
 import javax.swing.*;
-import java.util.List;
 import java.util.Map;
 
 /**
