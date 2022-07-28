@@ -1,12 +1,14 @@
 package cn.easyjce.plugin.service;
 
 import cn.easyjce.plugin.ParamNullPointException;
+import cn.easyjce.plugin.beans.Parameter;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +31,9 @@ public enum JceSpec {
     },
     KeyPairGenerator {
         @Override
-        public List<String> params() {
-            return Collections.singletonList("keysize");
+        public List<Parameter> params() {
+            return Collections.singletonList(new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "keysize"));
         }
-
         @Override
         public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             java.security.KeyPairGenerator instance = java.security.KeyPairGenerator.getInstance(algorithm, provider);
@@ -52,8 +53,8 @@ public enum JceSpec {
     },
     SecureRandom {
         @Override
-        public List<String> params() {
-            return Collections.singletonList("length");
+        public List<Parameter> params() {
+            return Collections.singletonList(new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "length"));
         }
         @Override
         public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -73,12 +74,52 @@ public enum JceSpec {
             rs.put("output", output);
             return rs;
         }
-    }
+    },
+    Signature {
+        @Override
+        public List<Parameter> params() {
+            return Arrays.asList(
+                    new Parameter(Parameter.ParameterEnum.RADIO_BUTTON, "type", Arrays.asList("sign", "verify")),
+                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "cert"),
+                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "private"),
+                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "public"));
+        }
+        @Override
+        public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
+            java.security.Signature instance = java.security.Signature.getInstance(algorithm, provider);
+            Map<String, byte[]> rs = new HashMap<>(2);
+            rs.put("output", instance.sign());
+            return rs;
+        }
+    },
+    CertStore,
+    SaslClientFactory,
+    SaslServerFactory,
+    AlgorithmParameterGenerator,
+    AlgorithmParameters,
+    CertPathBuilder,
+    CertPathValidator,
+    CertificateFactory,
+    Configuration,
+    KeyFactory,
+    Policy,
+    KeyAgreement,
+    Cipher,
+    Mac,
+    SecretKeyFactory,
+    KeyManagerFactory,
+    SSLContext,
+    TrustManagerFactory,
+    GssApiMechanism,
+    TerminalFactory,
+    KeyInfoFactory
     ;
 
-    public abstract Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException;
+    public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
+        throw new IllegalArgumentException("unsupported");
+    }
 
-    public List<String> params() {
+    public List<Parameter> params() {
         return Collections.emptyList();
     }
 }
