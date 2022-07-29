@@ -119,12 +119,12 @@ public class Parameter {
                     parameter.radioButtons.get(0).setSelected(true);
                 }
                 ButtonGroup bg = new ButtonGroup();
+                EventPublisher service = ServiceManager.getService(EventPublisher.class);
                 for (JRadioButton radioButton : parameter.radioButtons) {
                     bg.add(radioButton);
                     radioButton.addItemListener(e -> {
                         if (ItemEvent.SELECTED == e.getStateChange()) {
                             //当选择不同参数，整个参数UI重新绘制，并交换show与hide
-                            EventPublisher service = ServiceManager.getService(EventPublisher.class);
                             service.publishEvent(new ParameterUIEvent(parameter));
                         }
                     });

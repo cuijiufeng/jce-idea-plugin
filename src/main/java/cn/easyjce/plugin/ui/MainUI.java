@@ -158,5 +158,7 @@ public class MainUI {
             formBuilder.addLabeledComponent(parameter.getLabelComponent(), jPanel);
         }
         params.add(formBuilder.getPanel(), BorderLayout.CENTER);
+        //刷新JPanel，否则显示非常缓慢
+        params.updateUI();
     }
 }

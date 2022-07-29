@@ -93,6 +93,7 @@ public enum JceSpec {
         }
     },
     CertStore,
+    KeyStore,
     SaslClientFactory,
     SaslServerFactory,
     AlgorithmParameterGenerator,
