@@ -32,7 +32,7 @@ public enum JceSpec {
     KeyPairGenerator {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "keysize"));
+            return Collections.singletonList(new Parameter("keysize", Parameter.DisplayUI.SHOW));
         }
         @Override
         public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -54,7 +54,7 @@ public enum JceSpec {
     SecureRandom {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "length"));
+            return Collections.singletonList(new Parameter("length", Parameter.DisplayUI.SHOW));
         }
         @Override
         public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -79,10 +79,10 @@ public enum JceSpec {
         @Override
         public List<Parameter> params() {
             return Arrays.asList(
-                    new Parameter(Parameter.ParameterEnum.RADIO_BUTTON, "type", Arrays.asList("sign", "verify")),
-                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "cert"),
-                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "private"),
-                    new Parameter(Parameter.ParameterEnum.TEXT_FIELD, "public"));
+                    new Parameter("type", Arrays.asList("sign", "verify"), Parameter.DisplayUI.NONE),
+                    new Parameter("cert", Parameter.DisplayUI.HIDE),
+                    new Parameter("private", Parameter.DisplayUI.SHOW),
+                    new Parameter("public", Parameter.DisplayUI.HIDE));
         }
         @Override
         public Map<String, byte[]> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {

@@ -22,6 +22,7 @@
         <!--TODO 为什么写IconsUtil.PLUGIN报错-->
         <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
         <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.JceServiceImpl"/>
+        <applicationService serviceImplementation="cn.easyjce.plugin.event.EventPublisher"/>
     </extensions>
 
     <actions>

@@ -4,6 +4,8 @@ import cn.easyjce.plugin.beans.AlgorithmCombo;
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.beans.ProviderCombo;
 import cn.easyjce.plugin.beans.TypeCombo;
+import cn.easyjce.plugin.event.EventPublisher;
+import cn.easyjce.plugin.event.ParameterUIEvent;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
 import cn.easyjce.plugin.utils.NotificationsUtil;
@@ -103,14 +105,7 @@ public class MainUI {
             if (ItemEvent.SELECTED == event.getStateChange()) {
                 TypeCombo item = (TypeCombo) event.getItem();
                 reloadAlgorithmSelect(item.getProvider(), item.getType());
-                params.removeAll();
-                FormBuilder formBuilder = FormBuilder.createFormBuilder();
-                for (Parameter parameter : paramsList = JceSpec.valueOf(item.getType()).params()) {
-                    JPanel jPanel = new JPanel(new GridLayout());
-                    parameter.getComponent().forEach(jPanel::add);
-                    formBuilder.addLabeledComponent(parameter.getKey() + ":", jPanel);
-                }
-                params.add(formBuilder.getPanel(), BorderLayout.CENTER);
+                reviewParameterUI(this.paramsList = JceSpec.valueOf(item.getType()).params());
             }
         });
         algorithmSelect.addItemListener(event -> {
@@ -143,6 +138,25 @@ public class MainUI {
                 }
             }
         });
+        //当选择不同参数，整个参数UI重新绘制
+        EventPublisher service = ServiceManager.getService(EventPublisher.class);
+        service.addEventListener(ParameterUIEvent.class, event -> {
+            paramsList.forEach(Parameter::toggleUI);
+            reviewParameterUI(this.paramsList);
+        });
     }
 
+    private void reviewParameterUI(List<Parameter> paramsList) {
+        params.removeAll();
+        FormBuilder formBuilder = FormBuilder.createFormBuilder();
+        for (Parameter parameter : paramsList) {
+            if (parameter.isHide()) {
+                continue;
+            }
+            JPanel jPanel = new JPanel(new GridLayout());
+            parameter.getComponent().forEach(jPanel::add);
+            formBuilder.addLabeledComponent(parameter.getLabelComponent(), jPanel);
+        }
+        params.add(formBuilder.getPanel(), BorderLayout.CENTER);
+    }
 }
