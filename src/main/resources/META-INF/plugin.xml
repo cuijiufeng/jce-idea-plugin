@@ -21,8 +21,9 @@
         <applicationConfigurable groupId="other" id="jce.configuration" instance="cn.easyjce.plugin.configuration.JcePluginConfiguration"/>
         <!--TODO 为什么写IconsUtil.PLUGIN报错-->
         <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
-        <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.JceServiceImpl"/>
         <applicationService serviceImplementation="cn.easyjce.plugin.event.EventPublisher"/>
+        <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.JceServiceImpl"/>
+        <applicationService serviceImplementation="cn.easyjce.plugin.service.impl.CodecServiceImpl"/>
     </extensions>
 
     <actions>

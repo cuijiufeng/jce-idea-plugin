@@ -35,14 +35,14 @@ public class Parameter {
         this.anEnum.init(this);
     }
 
-    public Parameter(String label, List<String> rbText, DisplayUI isShow) {
+    public Parameter(String label, List<String> rbText) {
         this.anEnum = ParameterEnum.RADIO_BUTTON;
         this.label = label;
         this.labelComponent = new JBLabel(label + ":");
         if (CollectionUtils.isEmpty(rbText)) {
             throw new NullPointerException("can't be null");
         }
-        this.isShow = isShow;
+        this.isShow = DisplayUI.NONE;
         this.anEnum.init(this, rbText.toArray(new String[0]));
     }
 
@@ -131,12 +131,7 @@ public class Parameter {
                 }
             }
             @Override
-            public void clear(Parameter parameter) {
-                for (JRadioButton radioButton : parameter.radioButtons) {
-                    radioButton.setSelected(false);
-                }
-                parameter.radioButtons.get(0).setSelected(true);
-            }
+            public void clear(Parameter parameter) {}
         }
         ;
         public abstract String getValue(Parameter parameter);

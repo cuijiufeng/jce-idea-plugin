@@ -60,8 +60,13 @@ public class MainUI {
 
     public void reset() {
         reloadProviderSelect(ServiceManager.getService(JceServiceImpl.class).getProviders());
+        this.clear();
+    }
+
+    private void clear() {
         input.setText(null);
         output.setText(null);
+        paramsList.forEach(Parameter::clear);
     }
 
     public void reloadProviderSelect(Provider[] providers) {
@@ -116,9 +121,7 @@ public class MainUI {
         clear.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                input.setText(null);
-                output.setText(null);
-                paramsList.forEach(Parameter::clear);
+                clear();
             }
         });
         compute.addMouseListener(new MouseAdapter() {
@@ -147,6 +150,7 @@ public class MainUI {
     }
 
     private void reviewParameterUI(List<Parameter> paramsList) {
+        this.clear();
         params.removeAll();
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
         for (Parameter parameter : paramsList) {
