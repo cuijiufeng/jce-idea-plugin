@@ -33,7 +33,7 @@ public final class JceServiceImpl {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Object> entry : outputMap.entrySet()) {
                 sb.append(entry.getKey());
-                sb.append(":");
+                sb.append(':');
                 String value = entry.getValue().toString();
                 if (entry.getValue() instanceof byte[]) {
                     value = service.encode(CodecServiceImpl.IO.OUT, (byte[]) entry.getValue());
@@ -54,7 +54,7 @@ public final class JceServiceImpl {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
             LogUtil.LOG.warn(e.getMessage());
         } catch (GeneralSecurityException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, "jce error");
+            NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
             LogUtil.LOG.error(e);
         } catch (Throwable e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, "unknown error");

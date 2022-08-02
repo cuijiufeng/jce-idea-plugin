@@ -144,9 +144,7 @@ public class MainUI {
         });
         //当选择不同参数，整个参数UI重新绘制
         EventPublisher service = ServiceManager.getService(EventPublisher.class);
-        service.addEventListener(ParameterUIEvent.class, event -> {
-            reviewParameterUI(this.paramsList);
-        });
+        service.addEventListener(ParameterUIEvent.class, event -> reviewParameterUI(this.paramsList));
     }
 
     private void reviewParameterUI(List<Parameter> paramsList) {
