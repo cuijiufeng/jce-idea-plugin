@@ -157,7 +157,7 @@ public class MainUI {
             if (parameter.isHide()) {
                 continue;
             }
-            JPanel jPanel = new JPanel(new GridLayout());
+            JPanel jPanel = new JPanel(new GridLayout(0, parameter.getMaxCol()));
             parameter.getComponent().forEach(jPanel::add);
             formBuilder.addLabeledComponent(parameter.getLabelComponent(), jPanel);
         }

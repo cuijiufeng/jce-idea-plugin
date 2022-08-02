@@ -8,6 +8,9 @@ import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -88,7 +91,7 @@ public enum JceSpec {
         @Override
         public List<Parameter> params() {
             return Arrays.asList(
-                    new Parameter("type", Arrays.asList("sign", "verify")),
+                    new Parameter("type", Arrays.asList("sign", "verify"), 2),
                     new Parameter("private", Parameter.DisplayUI.SHOW),
                     new Parameter("cert", Parameter.DisplayUI.HIDE),
                     new Parameter("public", Parameter.DisplayUI.HIDE),
@@ -118,7 +121,7 @@ public enum JceSpec {
                     byte[] pub = service.decode(CodecServiceImpl.IO.IN, params.get("public"));
                     instance.initVerify(keyFactory.generatePublic(new X509EncodedKeySpec(pub)));
                 } else if (StringUtils.isNotBlank(params.get("cert"))) {
-                    throw new UnsupportedOperationException("unsupported operation type");
+                    throw new UnsupportedOperationException("unsupported cert");
                 } else {
                     throw new ParameterIllegalException("{0} parameter is empty", "cert、public");
                 }
@@ -133,6 +136,26 @@ public enum JceSpec {
     },
     CertStore,
     KeyStore,
+    KeyGenerator {
+        @Override
+        public List<Parameter> params() {
+            return Collections.singletonList(new Parameter("keysize", Parameter.DisplayUI.SHOW));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
+            javax.crypto.KeyGenerator instance = javax.crypto.KeyGenerator.getInstance(algorithm, provider);
+            SecretKey secretKey = instance.generateKey();
+            if (StringUtils.isNotBlank(params.get("keysize"))) {
+                Integer keysize = new StringValidate("keysize", params.get("keysize"))
+                        .parseInt()
+                        .get();
+                instance.init(keysize);
+            }
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("key", secretKey.getEncoded());
+            return rs;
+        }
+    },
     SaslClientFactory,
     SaslServerFactory,
     AlgorithmParameterGenerator,
@@ -141,12 +164,90 @@ public enum JceSpec {
     CertPathValidator,
     CertificateFactory,
     Configuration,
-    KeyFactory,
+    KeyFactory{
+        @Override
+        public List<Parameter> params() {
+            return Arrays.asList(
+                    new Parameter("private", Parameter.DisplayUI.SHOW),
+                    new Parameter("public", Parameter.DisplayUI.SHOW));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
+                throws GeneralSecurityException {
+            CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
+            java.security.KeyFactory instance = java.security.KeyFactory.getInstance(algorithm, provider);
+            String privParam = new StringValidate("private", params.get("private"))
+                    .isNotBlank()
+                    .get();
+            byte[] priv = service.decode(CodecServiceImpl.IO.IN, privParam);
+            PrivateKey privateKey = instance.generatePrivate(new PKCS8EncodedKeySpec(priv));
+            String pubParam = new StringValidate("public", params.get("public"))
+                    .isNotBlank()
+                    .get();
+            byte[] pub = service.decode(CodecServiceImpl.IO.IN, pubParam);
+            PublicKey publicKey = instance.generatePublic(new X509EncodedKeySpec(pub));
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("private", privateKey);
+            rs.put("public", publicKey);
+            return rs;
+        }
+    },
     Policy,
     KeyAgreement,
-    Cipher,
-    Mac,
-    SecretKeyFactory,
+    Cipher {
+        @Override
+        public List<Parameter> params() {
+            return Arrays.asList(
+                    new Parameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2),
+                    new Parameter("key", Parameter.DisplayUI.SHOW),
+                    new Parameter("private", Parameter.DisplayUI.HIDE),
+                    new Parameter("public", Parameter.DisplayUI.HIDE));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException, IOException {
+            javax.crypto.Cipher instance = javax.crypto.Cipher.getInstance(algorithm, provider);
+            //instance.init();
+            //instance.update();
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance.doFinal());
+            return rs;
+        }
+    },
+    Mac {
+        @Override
+        public List<Parameter> params() {
+            return Collections.singletonList(new Parameter("key", Parameter.DisplayUI.SHOW));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
+            CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
+            javax.crypto.Mac instance = javax.crypto.Mac.getInstance(algorithm, provider);
+            String keyParam = new StringValidate("key", params.get("key"))
+                    .isNotBlank()
+                    .get();
+            byte[] key = service.decode(CodecServiceImpl.IO.IN, keyParam);
+            instance.init(new SecretKeySpec(key, algorithm));
+            instance.update(new ByteArrValidate("input", inputBytes).isNotEmpty().get());
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance.doFinal());
+            return rs;
+        }
+    },
+    SecretKeyFactory {
+        @Override
+        public List<Parameter> params() {
+            return super.params();
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException, IOException {
+            javax.crypto.SecretKeyFactory instance = javax.crypto.SecretKeyFactory.getInstance(algorithm, provider);
+            SecretKeySpec keySpec = new SecretKeySpec(new ByteArrValidate("input", inputBytes).isNotEmpty().get(), algorithm);
+            SecretKey secretKey = instance.generateSecret(keySpec);
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("key", secretKey);
+            return rs;
+        }
+    },
     KeyManagerFactory,
     SSLContext,
     TrustManagerFactory,
@@ -155,12 +256,12 @@ public enum JceSpec {
     KeyInfoFactory
     ;
 
-    public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
-            throws GeneralSecurityException {
-        throw new UnsupportedOperationException("unsupported operation");
-    }
-
     public List<Parameter> params() {
         return Collections.emptyList();
+    }
+
+    public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
+            throws GeneralSecurityException, IOException {
+        throw new UnsupportedOperationException("unsupported operation");
     }
 }

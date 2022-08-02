@@ -25,6 +25,7 @@ public class Parameter {
     private final JBLabel labelComponent;
     private JTextField textField;
     private List<JRadioButton> radioButtons;
+    private int maxCol = 1;
     private DisplayUI isShow;
 
     public Parameter(String label, DisplayUI isShow) {
@@ -35,13 +36,14 @@ public class Parameter {
         this.anEnum.init(this);
     }
 
-    public Parameter(String label, List<String> rbText) {
+    public Parameter(String label, List<String> rbText, int maxCol) {
         this.anEnum = ParameterEnum.RADIO_BUTTON;
         this.label = label;
         this.labelComponent = new JBLabel(label + ":");
         if (CollectionUtils.isEmpty(rbText)) {
             throw new NullPointerException("can't be null");
         }
+        this.maxCol = maxCol;
         this.isShow = DisplayUI.NONE;
         this.anEnum.init(this, rbText.toArray(new String[0]));
     }
@@ -64,6 +66,10 @@ public class Parameter {
 
     public void clear() {
         anEnum.clear(this);
+    }
+
+    public int getMaxCol() {
+        return maxCol;
     }
 
     public boolean isHide() {
