@@ -43,7 +43,7 @@ public enum JceSpec {
     KeyPairGenerator {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("keysize", Parameter.DisplayUI.SHOW));
+            return Collections.singletonList(new Parameter("keysize"));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -67,7 +67,7 @@ public enum JceSpec {
     SecureRandom {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("length", Parameter.DisplayUI.SHOW));
+            return Collections.singletonList(new Parameter("length"));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -90,12 +90,12 @@ public enum JceSpec {
     Signature {
         @Override
         public List<Parameter> params() {
-            return Arrays.asList(
-                    new Parameter("type", Arrays.asList("sign", "verify"), 2),
-                    new Parameter("private", Parameter.DisplayUI.SHOW),
-                    new Parameter("cert", Parameter.DisplayUI.HIDE),
-                    new Parameter("public", Parameter.DisplayUI.HIDE),
-                    new Parameter("plain", Parameter.DisplayUI.HIDE));
+            Parameter parameter = new Parameter("type", Arrays.asList("sign", "verify"), 2);
+            return Arrays.asList(parameter,
+                    new Parameter("private", () -> parameter.getValue().equals("sign")),
+                    new Parameter("cert", () -> parameter.getValue().equals("verify")),
+                    new Parameter("public", () -> parameter.getValue().equals("verify")),
+                    new Parameter("plain", () -> parameter.getValue().equals("verify")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -139,7 +139,7 @@ public enum JceSpec {
     KeyGenerator {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("keysize", Parameter.DisplayUI.SHOW));
+            return Collections.singletonList(new Parameter("keysize"));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -167,9 +167,7 @@ public enum JceSpec {
     KeyFactory{
         @Override
         public List<Parameter> params() {
-            return Arrays.asList(
-                    new Parameter("private", Parameter.DisplayUI.SHOW),
-                    new Parameter("public", Parameter.DisplayUI.SHOW));
+            return Arrays.asList(new Parameter("private"), new Parameter("public"));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -197,11 +195,11 @@ public enum JceSpec {
     Cipher {
         @Override
         public List<Parameter> params() {
-            return Arrays.asList(
-                    new Parameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2),
-                    new Parameter("key", Parameter.DisplayUI.SHOW),
-                    new Parameter("private", Parameter.DisplayUI.HIDE),
-                    new Parameter("public", Parameter.DisplayUI.HIDE));
+            Parameter parameter = new Parameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2);
+            return Arrays.asList(parameter,
+                    new Parameter("key", () -> parameter.getValue().equals("symmetric encryption") || parameter.getValue().equals("symmetric decryption")),
+                    new Parameter("private", () -> parameter.getValue().equals("asymmetric encryption")),
+                    new Parameter("public", () -> parameter.getValue().equals("asymmetric decryption")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException, IOException {
@@ -216,7 +214,7 @@ public enum JceSpec {
     Mac {
         @Override
         public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("key", Parameter.DisplayUI.SHOW));
+            return Collections.singletonList(new Parameter("key"));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {

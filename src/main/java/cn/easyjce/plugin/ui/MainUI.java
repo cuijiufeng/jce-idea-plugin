@@ -11,6 +11,7 @@ import cn.easyjce.plugin.service.impl.JceServiceImpl;
 import cn.easyjce.plugin.utils.NotificationsUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 
 import javax.swing.*;
@@ -144,7 +145,6 @@ public class MainUI {
         //当选择不同参数，整个参数UI重新绘制
         EventPublisher service = ServiceManager.getService(EventPublisher.class);
         service.addEventListener(ParameterUIEvent.class, event -> {
-            paramsList.forEach(Parameter::toggleUI);
             reviewParameterUI(this.paramsList);
         });
     }
@@ -154,12 +154,11 @@ public class MainUI {
         params.removeAll();
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
         for (Parameter parameter : paramsList) {
-            if (parameter.isHide()) {
-                continue;
+            if (parameter.isShow()) {
+                JPanel jPanel = new JPanel(new GridLayout(0, parameter.getMaxCol()));
+                parameter.getComponent().forEach(jPanel::add);
+                formBuilder.addLabeledComponent(new JBLabel(parameter.getKey()+":"), jPanel);
             }
-            JPanel jPanel = new JPanel(new GridLayout(0, parameter.getMaxCol()));
-            parameter.getComponent().forEach(jPanel::add);
-            formBuilder.addLabeledComponent(parameter.getLabelComponent(), jPanel);
         }
         params.add(formBuilder.getPanel(), BorderLayout.CENTER);
         //刷新JPanel，否则显示非常缓慢
