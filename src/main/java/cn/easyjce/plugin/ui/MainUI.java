@@ -111,12 +111,13 @@ public class MainUI {
             if (ItemEvent.SELECTED == event.getStateChange()) {
                 TypeCombo item = (TypeCombo) event.getItem();
                 reloadAlgorithmSelect(item.getProvider(), item.getType());
-                reviewParameterUI(this.paramsList = JceSpec.valueOf(item.getType()).params());
             }
         });
         algorithmSelect.addItemListener(event -> {
             if (ItemEvent.SELECTED == event.getStateChange()) {
-                //ignore
+                TypeCombo type = (TypeCombo) typeSelect.getSelectedItem();
+                AlgorithmCombo item = (AlgorithmCombo) event.getItem();
+                reviewParameterUI(this.paramsList = JceSpec.valueOf(type.getType()).params(item.getAlgorithm()));
             }
         });
         clear.addMouseListener(new MouseAdapter() {
@@ -126,7 +127,7 @@ public class MainUI {
             }
         });
         compute.addMouseListener(new MouseAdapter() {
-            @SuppressWarnings("all")
+            @SuppressWarnings("ConstantConditions")
             @Override
             public void mouseClicked(MouseEvent e) {
                 ProviderCombo providerSelected = (ProviderCombo) providerSelect.getSelectedItem();

@@ -2,9 +2,9 @@ package cn.easyjce.plugin.beans;
 
 import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.event.ParameterUIEvent;
+import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.ui.components.JBTextField;
-import org.apache.commons.collections.CollectionUtils;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
@@ -27,29 +27,19 @@ public class Parameter {
     private int maxCol = 1;
     private final BooleanSupplier show;
 
-    public Parameter(String label) {
-        this.anEnum = ParameterEnum.TEXT_FIELD;
-        this.label = label;
-        this.show = () -> true;
-        this.anEnum.init(this);
-    }
-
-    public Parameter(String label, BooleanSupplier show) {
+    public Parameter(String label, String tooltip, BooleanSupplier show) {
         this.anEnum = ParameterEnum.TEXT_FIELD;
         this.label = label;
         this.show = show;
-        this.anEnum.init(this);
+        this.anEnum.init(this, tooltip);
     }
 
     public Parameter(String label, List<String> rbText, int maxCol) {
         this.anEnum = ParameterEnum.RADIO_BUTTON;
         this.label = label;
-        if (CollectionUtils.isEmpty(rbText)) {
-            throw new NullPointerException("can't be null");
-        }
-        this.maxCol = maxCol;
         this.show = () -> true;
-        this.anEnum.init(this, rbText.toArray(new String[0]));
+        this.anEnum.init(this, null, rbText.toArray(new String[0]));
+        this.maxCol = maxCol;
     }
 
     public List<? extends JComponent> getComponent() {
@@ -80,15 +70,16 @@ public class Parameter {
         TEXT_FIELD {
             @Override
             public String getValue(Parameter parameter) {
-                return parameter.textField.getText();
+                return parameter.textField.getText().trim();
             }
             @Override
             public List<? extends JComponent> getComponent(Parameter parameter) {
                 return Collections.singletonList(parameter.textField);
             }
             @Override
-            public void init(Parameter parameter, String... param) {
+            public void init(Parameter parameter, String tooltip, String... param) {
                 parameter.textField = new JBTextField();
+                parameter.textField.setToolTipText(MessagesUtil.getI18nMessage(tooltip));
             }
             @Override
             public void clear(Parameter parameter) {
@@ -110,7 +101,7 @@ public class Parameter {
                 return parameter.radioButtons;
             }
             @Override
-            public void init(Parameter parameter, String... param) {
+            public void init(Parameter parameter, String tooltip, String... param) {
                 parameter.radioButtons = Arrays.stream(param).map(JRadioButton::new).collect(Collectors.toList());
                 if (parameter.radioButtons.stream().noneMatch(JRadioButton::isSelected)) {
                     parameter.radioButtons.get(0).setSelected(true);
@@ -133,7 +124,7 @@ public class Parameter {
         ;
         public abstract String getValue(Parameter parameter);
         public abstract List<? extends JComponent> getComponent(Parameter parameter);
-        public abstract void init(Parameter parameter, String ... param);
+        public abstract void init(Parameter parameter, String tooltip, String... param);
         public abstract void clear(Parameter parameter);
     }
 }

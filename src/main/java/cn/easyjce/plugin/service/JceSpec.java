@@ -11,12 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,8 +34,8 @@ import java.util.Map;
 public enum JceSpec implements IJceSpec {
     SecureRandom {
         @Override
-        public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("length"));
+        public List<Parameter> params(String algorithm) {
+            return Collections.singletonList(new Parameter("length", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -65,8 +67,8 @@ public enum JceSpec implements IJceSpec {
     },
     Mac {
         @Override
-        public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("key"));
+        public List<Parameter> params(String algorithm) {
+            return Collections.singletonList(new Parameter("key", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -85,8 +87,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyGenerator {
         @Override
-        public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("keysize"));
+        public List<Parameter> params(String algorithm) {
+            return Collections.singletonList(new Parameter("keysize", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -105,8 +107,8 @@ public enum JceSpec implements IJceSpec {
     },
     SecretKeyFactory {
         @Override
-        public List<Parameter> params() {
-            return super.params();
+        public List<Parameter> params(String algorithm) {
+            return super.params(algorithm);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException, IOException {
@@ -118,8 +120,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyPairGenerator {
         @Override
-        public List<Parameter> params() {
-            return Collections.singletonList(new Parameter("keysize"));
+        public List<Parameter> params(String algorithm) {
+            return Collections.singletonList(new Parameter("keysize", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -142,8 +144,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyFactory{
         @Override
-        public List<Parameter> params() {
-            return Arrays.asList(new Parameter("private"), new Parameter("public"));
+        public List<Parameter> params(String algorithm) {
+            return Arrays.asList(new Parameter("private", null, () -> true), new Parameter("public", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -161,13 +163,13 @@ public enum JceSpec implements IJceSpec {
     },
     Signature {
         @Override
-        public List<Parameter> params() {
+        public List<Parameter> params(String algorithm) {
             Parameter parameter = new Parameter("type", Arrays.asList("sign", "verify"), 2);
             return Arrays.asList(parameter,
-                    new Parameter("private", () -> parameter.getValue().equals("sign")),
-                    new Parameter("cert", () -> parameter.getValue().equals("verify")),
-                    new Parameter("public", () -> parameter.getValue().equals("verify")),
-                    new Parameter("plain", () -> parameter.getValue().equals("verify")));
+                    new Parameter("private", null, () -> parameter.getValue().equals("sign")),
+                    new Parameter("cert", null, () -> parameter.getValue().equals("verify")),
+                    new Parameter("public", null, () -> parameter.getValue().equals("verify")),
+                    new Parameter("plain", null, () -> parameter.getValue().equals("verify")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -204,9 +206,9 @@ public enum JceSpec implements IJceSpec {
     },
     Cipher {
         @Override
-        public List<Parameter> params() {
+        public List<Parameter> params(String algorithm) {
             Parameter parameter = new Parameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2);
-            return Arrays.asList(parameter, new Parameter("key"));
+            return Arrays.asList(parameter, new Parameter("key", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -216,13 +218,14 @@ public enum JceSpec implements IJceSpec {
                     .isNotBlank()
                     .in(Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"))
                     .get();
+            //TODO 2022/8/8 17:22 对称加密可以使用向量iv
             if ("symmetric encryption".equals(type)) {
                 byte[] key = service.decode(CodecServiceImpl.IO.IN, params.get("key"));
-                SecretKey secretKey = new SecretKeySpec(key, algorithm);
+                SecretKey secretKey = new SecretKeySpec(key, algorithm.split("/")[0].split("_")[0]);
                 instance.init(javax.crypto.Cipher.ENCRYPT_MODE, secretKey);
             } else if ("symmetric decryption".equals(type)) {
                 byte[] key = service.decode(CodecServiceImpl.IO.IN, params.get("key"));
-                SecretKey secretKey = new SecretKeySpec(key, algorithm);
+                SecretKey secretKey = new SecretKeySpec(key, algorithm.split("/")[0].split("_")[0]);
                 instance.init(javax.crypto.Cipher.DECRYPT_MODE, secretKey);
             } else if ("asymmetric encryption".equals(type)) {
                 Key key;
@@ -255,8 +258,46 @@ public enum JceSpec implements IJceSpec {
     CertStore,
     SaslClientFactory,
     SaslServerFactory,
-    AlgorithmParameterGenerator,
-    AlgorithmParameters,
+    AlgorithmParameterGenerator {
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException, IOException {
+            java.security.AlgorithmParameterGenerator instance = java.security.AlgorithmParameterGenerator.getInstance(algorithm, provider);
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance.generateParameters());
+            return rs;
+        }
+    },
+    AlgorithmParameters {
+        @Override
+        public List<Parameter> params(String algorithm) {
+            return Arrays.asList(
+                    new Parameter("p", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
+                    new Parameter("q", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
+                    new Parameter("g", "please enter a hexadecimal number", () -> algorithm.equals("DSA")));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
+                throws GeneralSecurityException, IOException {
+            java.security.AlgorithmParameters instance = java.security.AlgorithmParameters.getInstance(algorithm, provider);
+            if (inputBytes.length != 0) {
+                instance.init(inputBytes);
+                Map<String, Object> rs = new HashMap<>(2);
+                rs.put("output", instance);
+                return rs;
+            }
+            if ("DSA".equals(algorithm)) {
+                BigInteger p = new BigInteger(params.get("p"), 16);
+                BigInteger q = new BigInteger(params.get("q"), 16);
+                BigInteger r = new BigInteger(params.get("g"), 16);
+                instance.init(new DSAParameterSpec(p, q, r));
+            } else {
+                throw new UnsupportedOperationException("unsupported algorithm");
+            }
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance.getEncoded());
+            return rs;
+        }
+    },
     CertPathBuilder,
     CertPathValidator,
     CertificateFactory,

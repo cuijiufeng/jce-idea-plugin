@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public interface IJceSpec {
 
-    default List<Parameter> params() {
+    default List<Parameter> params(String algorithm) {
         return Collections.emptyList();
     }
 
@@ -45,8 +45,8 @@ public interface IJceSpec {
         try {
             instance = java.security.KeyFactory.getInstance(algorithm, provider);
         } catch (NoSuchAlgorithmException e) {
-            LogUtil.LOG.info(e.getMessage());
             instance = java.security.KeyFactory.getInstance(algorithm);
+            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
         }
         byte[] priv = new ByteArrValidate("private key", bytes).isNotEmpty().get();
         return instance.generatePrivate(new PKCS8EncodedKeySpec(priv));
@@ -57,8 +57,8 @@ public interface IJceSpec {
         try {
             instance = java.security.KeyFactory.getInstance(algorithm, provider);
         } catch (NoSuchAlgorithmException e) {
-            LogUtil.LOG.info(e.getMessage());
             instance = java.security.KeyFactory.getInstance(algorithm);
+            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
         }
         byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();;
         return instance.generatePublic(new X509EncodedKeySpec(pub));

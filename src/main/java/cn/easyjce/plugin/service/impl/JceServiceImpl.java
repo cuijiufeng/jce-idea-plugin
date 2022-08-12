@@ -44,13 +44,9 @@ public final class JceServiceImpl {
             return sb.toString();
         } catch (ParameterIllegalException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage(), e.getParams());
-            LogUtil.LOG.warn(e.getMessage());
-        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
-        } catch (InvalidKeySpecException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, "key parsing failed");
-            LogUtil.LOG.warn(e.getMessage());
-        } catch (SignatureException e) {
+        } catch (IllegalArgumentException | InvalidKeySpecException | SignatureException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
             LogUtil.LOG.warn(e.getMessage());
         } catch (GeneralSecurityException e) {
