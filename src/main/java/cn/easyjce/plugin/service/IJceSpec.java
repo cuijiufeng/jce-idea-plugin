@@ -1,17 +1,14 @@
 package cn.easyjce.plugin.service;
 
 import cn.easyjce.plugin.beans.Parameter;
+import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
 import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.validate.ByteArrValidate;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Collections;
@@ -29,9 +26,9 @@ public interface IJceSpec {
         return Collections.emptyList();
     }
 
-    default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
+    default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
             throws GeneralSecurityException, IOException {
-        throw new UnsupportedOperationException("unsupported operation");
+        throw new JceUnsupportedOperationException("unsupported operation");
     }
 
     default SecretKey parseSecretKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {

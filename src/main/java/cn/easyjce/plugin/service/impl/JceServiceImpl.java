@@ -1,5 +1,6 @@
 package cn.easyjce.plugin.service.impl;
 
+import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.utils.LogUtil;
@@ -7,11 +8,10 @@ import cn.easyjce.plugin.utils.NotificationsUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.Security;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
 /**
@@ -25,11 +25,11 @@ public final class JceServiceImpl {
         return Security.getProviders();
     }
 
-    public String execute(String type, String algorithm, Provider provider, String input, Map<String, String> paramsMap) {
+    public String execute(String type, String algorithm, Provider provider, String input, Map<String, ?> paramsMap) {
         CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
+        JceSpec jceSpec = JceSpec.valueOf(type);
         try {
-            Map<String, Object> outputMap = JceSpec.valueOf(type)
-                    .executeInternal(algorithm, provider, service.decode(CodecServiceImpl.IO.IN, input), paramsMap);
+            Map<String, Object> outputMap = jceSpec.executeInternal(algorithm, provider, service.decode(CodecServiceImpl.IO.IN, input), paramsMap);
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Object> entry : outputMap.entrySet()) {
                 sb.append(entry.getKey());
@@ -44,12 +44,9 @@ public final class JceServiceImpl {
             return sb.toString();
         } catch (ParameterIllegalException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage(), e.getParams());
-        } catch (UnsupportedOperationException e) {
+        } catch (JceUnsupportedOperationException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
-        } catch (IllegalArgumentException | InvalidKeySpecException | SignatureException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
-            LogUtil.LOG.warn(e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (IllegalArgumentException | IOException | GeneralSecurityException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
             LogUtil.LOG.error(e);
         } catch (Throwable e) {

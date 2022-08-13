@@ -12,8 +12,12 @@ import java.util.List;
  */
 public class StringValidate extends AbstractValidate<String>{
 
-    public StringValidate(String name, String param) {
-        super(name, param);
+    public StringValidate(String name, Object param) {
+        super(name, (String) param);
+    }
+
+    public boolean isNotBlankNoEx() {
+        return StringUtils.isNotBlank(this.param);
     }
 
     public StringValidate isNotBlank() {

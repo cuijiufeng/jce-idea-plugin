@@ -9,8 +9,8 @@ import cn.easyjce.plugin.exception.ParameterIllegalException;
  */
 public class IntValidate extends AbstractValidate<Integer>{
 
-    public IntValidate(String name, int param) {
-        super(name, param);
+    public IntValidate(String name, Object param) {
+        super(name, (Integer) param);
     }
 
     public IntValidate gt(int max) {

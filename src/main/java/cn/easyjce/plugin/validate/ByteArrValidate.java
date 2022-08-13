@@ -9,8 +9,8 @@ import cn.easyjce.plugin.exception.ParameterIllegalException;
  */
 public class ByteArrValidate extends AbstractValidate<byte[]> {
 
-    public ByteArrValidate(String name, byte[] param) {
-        super(name, param);
+    public ByteArrValidate(String name, Object param) {
+        super(name, (byte[]) param);
     }
 
     public ByteArrValidate isNotEmpty() {

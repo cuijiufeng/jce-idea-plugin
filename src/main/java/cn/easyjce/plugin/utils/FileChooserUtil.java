@@ -5,7 +5,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -15,13 +14,8 @@ import java.util.Objects;
  */
 public class FileChooserUtil {
 
-    public static byte[] byteContentFilechooser(FileChooserDescriptor descriptor, Project project, VirtualFile toSelect) {
-        try {
-            return Objects.requireNonNull(FileChooser.chooseFile(descriptor, project, toSelect)).contentsToByteArray();
-        } catch (IOException e) {
-            LogUtil.LOG.error(e);
-            return null;
-        }
+    public static String pathFilechooser(FileChooserDescriptor descriptor, Project project, VirtualFile toSelect) {
+        return Objects.requireNonNull(FileChooser.chooseFile(descriptor, project, toSelect)).getPath();
     }
 
     public static class ChooserDescBuilder {
