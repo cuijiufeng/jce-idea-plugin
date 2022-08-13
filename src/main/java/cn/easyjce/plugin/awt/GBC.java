@@ -9,6 +9,7 @@ import java.awt.*;
  * @Date: 2022/7/22 10:19
  * @author: cuijiufeng
  */
+@Deprecated
 public class GBC extends GridBagConstraints {
     //初始化左上角位置
     public GBC(int gridx, int gridy) {

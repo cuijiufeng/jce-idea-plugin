@@ -1,5 +1,8 @@
 package cn.easyjce.plugin.service;
 
+import cn.easyjce.plugin.beans.JButtonParameter;
+import cn.easyjce.plugin.beans.JRadioButtonParameter;
+import cn.easyjce.plugin.beans.JTextFieldParameter;
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.impl.CodecServiceImpl;
@@ -34,8 +37,8 @@ import java.util.Map;
 public enum JceSpec implements IJceSpec {
     SecureRandom {
         @Override
-        public List<Parameter> params(String algorithm) {
-            return Collections.singletonList(new Parameter("length", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JTextFieldParameter("length", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -67,8 +70,8 @@ public enum JceSpec implements IJceSpec {
     },
     Mac {
         @Override
-        public List<Parameter> params(String algorithm) {
-            return Collections.singletonList(new Parameter("key", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JTextFieldParameter("key", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -87,8 +90,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyGenerator {
         @Override
-        public List<Parameter> params(String algorithm) {
-            return Collections.singletonList(new Parameter("keysize", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -107,7 +110,7 @@ public enum JceSpec implements IJceSpec {
     },
     SecretKeyFactory {
         @Override
-        public List<Parameter> params(String algorithm) {
+        public List<Parameter<?>> params(String algorithm) {
             return super.params(algorithm);
         }
         @Override
@@ -120,8 +123,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyPairGenerator {
         @Override
-        public List<Parameter> params(String algorithm) {
-            return Collections.singletonList(new Parameter("keysize", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -144,8 +147,8 @@ public enum JceSpec implements IJceSpec {
     },
     KeyFactory{
         @Override
-        public List<Parameter> params(String algorithm) {
-            return Arrays.asList(new Parameter("private", null, () -> true), new Parameter("public", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            return Arrays.asList(new JTextFieldParameter("private", null, () -> true), new JTextFieldParameter("public", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -163,13 +166,13 @@ public enum JceSpec implements IJceSpec {
     },
     Signature {
         @Override
-        public List<Parameter> params(String algorithm) {
-            Parameter parameter = new Parameter("type", Arrays.asList("sign", "verify"), 2);
+        public List<Parameter<?>> params(String algorithm) {
+            Parameter<String> parameter = new JRadioButtonParameter("type", Arrays.asList("sign", "verify"), 2);
             return Arrays.asList(parameter,
-                    new Parameter("private", null, () -> parameter.getValue().equals("sign")),
-                    new Parameter("cert", null, () -> parameter.getValue().equals("verify")),
-                    new Parameter("public", null, () -> parameter.getValue().equals("verify")),
-                    new Parameter("plain", null, () -> parameter.getValue().equals("verify")));
+                    new JTextFieldParameter("private", null, () -> parameter.getValue().equals("sign")),
+                    new JTextFieldParameter("cert", null, () -> parameter.getValue().equals("verify")),
+                    new JTextFieldParameter("public", null, () -> parameter.getValue().equals("verify")),
+                    new JTextFieldParameter("plain", null, () -> parameter.getValue().equals("verify")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -206,9 +209,9 @@ public enum JceSpec implements IJceSpec {
     },
     Cipher {
         @Override
-        public List<Parameter> params(String algorithm) {
-            Parameter parameter = new Parameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2);
-            return Arrays.asList(parameter, new Parameter("key", null, () -> true));
+        public List<Parameter<?>> params(String algorithm) {
+            Parameter<String> parameter = new JRadioButtonParameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2);
+            return Arrays.asList(parameter, new JTextFieldParameter("key", null, () -> true));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -254,7 +257,20 @@ public enum JceSpec implements IJceSpec {
             return rs;
         }
     },
-    KeyStore,
+    KeyStore {
+        @Override
+        public List<Parameter<?>> params(String algorithm) {
+            return Arrays.asList(new JButtonParameter("jks", "choose file"));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
+                throws GeneralSecurityException, IOException {
+            java.security.KeyStore instance = java.security.KeyStore.getInstance(algorithm, provider);
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance);
+            return rs;
+        }
+    },
     CertStore,
     SaslClientFactory,
     SaslServerFactory,
@@ -269,11 +285,11 @@ public enum JceSpec implements IJceSpec {
     },
     AlgorithmParameters {
         @Override
-        public List<Parameter> params(String algorithm) {
+        public List<Parameter<?>> params(String algorithm) {
             return Arrays.asList(
-                    new Parameter("p", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
-                    new Parameter("q", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
-                    new Parameter("g", "please enter a hexadecimal number", () -> algorithm.equals("DSA")));
+                    new JTextFieldParameter("p", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
+                    new JTextFieldParameter("q", "please enter a hexadecimal number", () -> algorithm.equals("DSA")),
+                    new JTextFieldParameter("g", "please enter a hexadecimal number", () -> algorithm.equals("DSA")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)

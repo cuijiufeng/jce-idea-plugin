@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public interface IJceSpec {
 
-    default List<Parameter> params(String algorithm) {
+    default List<Parameter<?>> params(String algorithm) {
         return Collections.emptyList();
     }
 
