@@ -257,10 +257,9 @@ public enum JceSpec implements IJceSpec {
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
                 throws GeneralSecurityException, IOException {
-            java.security.KeyStore instance = java.security.KeyStore.getInstance(algorithm, provider);
             String jksParam = new StringValidate("jks", params.get("jks")).isNotBlank().get();
             String passParam = new StringValidate("password", params.get("password")).isNotBlank().get();
-            instance.load(new FileInputStream(jksParam), passParam.toCharArray());
+            java.security.KeyStore instance = loadKeyStore(algorithm, provider, new FileInputStream(jksParam), passParam);
             Map<String, Object> rs = new HashMap<>(2);
             Enumeration<String> aliases = instance.aliases();
             while (aliases.hasMoreElements()) {

@@ -8,6 +8,7 @@ import cn.easyjce.plugin.validate.ByteArrValidate;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -59,5 +60,16 @@ public interface IJceSpec {
         }
         byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();;
         return instance.generatePublic(new X509EncodedKeySpec(pub));
+    }
+
+    default KeyStore loadKeyStore(String algorithm, Provider provider, InputStream is, String password) throws GeneralSecurityException, IOException {
+        KeyStore keyStore;
+        try {
+            keyStore = KeyStore.getInstance(algorithm, provider);
+        } catch (KeyStoreException e) {
+            keyStore = KeyStore.getInstance(algorithm);
+        }
+        keyStore.load(is, password.toCharArray());
+        return keyStore;
     }
 }
