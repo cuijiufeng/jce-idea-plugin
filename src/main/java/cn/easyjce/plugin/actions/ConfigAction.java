@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.actions;
 
-import cn.easyjce.plugin.configuration.JcePluginConfigurable;
+import cn.easyjce.plugin.configurable.JcePluginConfigurable;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;

@@ -1,4 +1,4 @@
-package cn.easyjce.plugin.configuration;
+package cn.easyjce.plugin.configurable;
 
 import com.intellij.util.xmlb.Converter;
 import org.jetbrains.annotations.NotNull;

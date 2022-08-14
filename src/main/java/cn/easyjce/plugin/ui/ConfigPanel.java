@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.ui;
 
-import cn.easyjce.plugin.configuration.JcePluginState;
+import cn.easyjce.plugin.configurable.JcePluginState;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.util.ui.FormBuilder;
 

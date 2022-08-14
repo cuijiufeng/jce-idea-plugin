@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.service.impl;
 
-import cn.easyjce.plugin.configuration.JcePluginState;
+import cn.easyjce.plugin.configurable.JcePluginState;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;

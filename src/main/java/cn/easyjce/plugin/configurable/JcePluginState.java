@@ -1,4 +1,4 @@
-package cn.easyjce.plugin.configuration;
+package cn.easyjce.plugin.configurable;
 
 import cn.easyjce.plugin.global.PluginConstants;
 import com.intellij.openapi.application.ApplicationManager;

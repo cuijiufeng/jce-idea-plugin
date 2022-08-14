@@ -9,7 +9,7 @@ public interface PluginConstants {
     /**
      *
      */
-    String GITHUB_ADDR = "https://github.com/cuijiufeng";
+    String GITHUB_ADDR = "https://github.com/cuijiufeng/jce-idea-plugin";
 
     /**
      * 通知分组
