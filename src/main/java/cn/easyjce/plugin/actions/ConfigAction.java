@@ -1,7 +1,6 @@
 package cn.easyjce.plugin.actions;
 
-import cn.easyjce.plugin.configuration.JcePluginConfiguration;
-import cn.easyjce.plugin.global.PluginConstants;
+import cn.easyjce.plugin.configuration.JcePluginConfigurable;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -22,6 +21,6 @@ public class ConfigAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         //打开设置
-        ShowSettingsUtil.getInstance().showSettingsDialog(e.getProject(), JcePluginConfiguration.class);
+        ShowSettingsUtil.getInstance().showSettingsDialog(e.getProject(), JcePluginConfigurable.class);
     }
 }

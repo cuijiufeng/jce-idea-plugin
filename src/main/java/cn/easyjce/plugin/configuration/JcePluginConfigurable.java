@@ -13,7 +13,7 @@ import javax.swing.*;
  * @Date: 2022/7/25 15:46
  * @author: cuijiufeng
  */
-public class JcePluginConfiguration implements Configurable {
+public class JcePluginConfigurable implements Configurable {
     private ConfigPanel configPanel;
 
     @Override
@@ -23,29 +23,28 @@ public class JcePluginConfiguration implements Configurable {
 
     @Override
     public @Nullable JComponent createComponent() {
-        configPanel = new ConfigPanel();
-        return configPanel.getPanel();
+        return (this.configPanel = new ConfigPanel()).getPanel();
     }
 
     @Override
     public boolean isModified() {
-        return configPanel.isModified();
+        return this.configPanel.isModified();
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        JcePluginState.getInstance().setInputRb(configPanel.getInputConfigValue());
-        JcePluginState.getInstance().setOutputRb(configPanel.getOutputConfigValue());
+        JcePluginState.getInstance().setInputRb(this.configPanel.getInputConfigValue());
+        JcePluginState.getInstance().setOutputRb(this.configPanel.getOutputConfigValue());
     }
 
     @Override
     public void reset() {
-        configPanel.setInputConfigValue(JcePluginState.getInstance().getInputRb());
-        configPanel.setOutputConfigValue(JcePluginState.getInstance().getOutputRb());
+        this.configPanel.setInputConfigValue(JcePluginState.getInstance().getInputRb());
+        this.configPanel.setOutputConfigValue(JcePluginState.getInstance().getOutputRb());
     }
 
     @Override
     public void disposeUIResources() {
-        configPanel = null;
+        this.configPanel = null;
     }
 }

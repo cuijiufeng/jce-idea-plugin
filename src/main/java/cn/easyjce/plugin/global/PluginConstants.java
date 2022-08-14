@@ -30,9 +30,4 @@ public interface PluginConstants {
      * config name
      */
     String CONFIG_NAME = "JCE Plugin";
-
-    interface CacheConstants {
-        String CONFIG_VALUE_RB_HEX = "config.value.rb.hex";
-        String CONFIG_VALUE_RB_BASE64 = "config.value.rb.base64";
-    }
 }

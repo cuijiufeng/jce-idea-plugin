@@ -30,6 +30,16 @@ public class ConfigUI {
         return this;
     }
 
+    public ConfigUI addLineComponent(String label, JComponent ... component) {
+        JPanel jPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        jPanel.add(new JLabel(label + ":"));
+        for (JComponent jComponent : component) {
+            jPanel.add(jComponent);
+        }
+        formBuilder.addComponent(jPanel);
+        return this;
+    }
+
     public JPanel getConfigPanel() {
         content.add(formBuilder.getPanel(), BorderLayout.CENTER);
         return configPanel;

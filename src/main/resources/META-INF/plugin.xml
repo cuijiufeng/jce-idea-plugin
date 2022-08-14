@@ -18,7 +18,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <applicationService serviceImplementation="cn.easyjce.plugin.configuration.JcePluginState"/>
-        <applicationConfigurable groupId="other" id="jce.configuration" instance="cn.easyjce.plugin.configuration.JcePluginConfiguration"/>
+        <applicationConfigurable groupId="other" id="jce.configuration" instance="cn.easyjce.plugin.configuration.JcePluginConfigurable"/>
         <!--TODO 为什么写IconsUtil.PLUGIN报错-->
         <toolWindow id="JCE" anchor="right" order="last" icon="/icons/logo.svg" factoryClass="cn.easyjce.plugin.intellij.WindowFactory"/>
         <applicationService serviceImplementation="cn.easyjce.plugin.event.EventPublisher"/>
