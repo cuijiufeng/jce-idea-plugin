@@ -24,17 +24,15 @@ public interface PluginConstants {
     /**
      * setting file
      */
-    String SETTING_FILE = "jce.persistent";
+    String SETTING_FILE = "jce.persistent.xml";
 
     /**
      * config name
      */
     String CONFIG_NAME = "JCE Plugin";
 
-    interface CacheKey {
-        String CONFIG_INPUT_RB_HEX = "config.input.radio.button.hex";
-        String CONFIG_INPUT_RB_BASE64 = "config.input.radio.button.base64";
-        String CONFIG_OUTPUT_RB_HEX = "config.output.radio.button.hex";
-        String CONFIG_OUTPUT_RB_BASE64 = "config.output.radio.button.base64";
+    interface CacheConstants {
+        String CONFIG_VALUE_RB_HEX = "config.value.rb.hex";
+        String CONFIG_VALUE_RB_BASE64 = "config.value.rb.base64";
     }
 }

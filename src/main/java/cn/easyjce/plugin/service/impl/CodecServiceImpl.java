@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.service.impl;
 
-import cn.easyjce.plugin.configuration.JcePluginSetting;
+import cn.easyjce.plugin.configuration.JcePluginState;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -15,7 +15,7 @@ public class CodecServiceImpl {
 
     public CodecServiceImpl() {
         //TODO 2022/7/29 16:20 从配置中获取输入输出使用的编码
-        JcePluginSetting.getSetting();
+        JcePluginState.getInstance();
     }
 
     public String encode(IO io, byte[] data) {
