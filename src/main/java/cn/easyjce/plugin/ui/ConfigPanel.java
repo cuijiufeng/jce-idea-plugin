@@ -22,6 +22,7 @@ import java.util.List;
  * @author: cuijiufeng
  */
 public class ConfigPanel {
+    private static final ConfigPanel SINGLETON = new ConfigPanel();
     private final JPanel jPanel;
     private final List<JRadioButton> inputComponents = Arrays.asList(
             new JRadioButton(JcePluginState.RbValueEnum.string.name()),
@@ -31,8 +32,9 @@ public class ConfigPanel {
             new JRadioButton(JcePluginState.RbValueEnum.string.name()),
             new JRadioButton(JcePluginState.RbValueEnum.hex.name()),
             new JRadioButton(JcePluginState.RbValueEnum.base64.name()));
+    private final JBList<String> jbList = new JBList<>();
 
-    public ConfigPanel() {
+    private ConfigPanel() {
         ButtonGroup inputBg = new ButtonGroup();
         this.inputComponents.forEach(inputBg::add);
         ButtonGroup outputBg = new ButtonGroup();
@@ -41,32 +43,53 @@ public class ConfigPanel {
                 .addLineComponent(MessagesUtil.getI18nMessage("input code") + ":", inputComponents.toArray(new JComponent[0]))
                 .addLineComponent(MessagesUtil.getI18nMessage("output code") + ":", outputComponents.toArray(new JComponent[0]))
                 .getConfigPanel();
-        String[] jbLabels = Arrays.stream(ServiceManager.getService(JceServiceImpl.class).getProviders())
-                .map(provider -> provider.getName() + " -> " + provider.getClass().getName())
-                .toArray(String[]::new);
-        JButton addProvider = new JButton("add provider");
-        JBTextField jbTextField = new JBTextField();
-        jbTextField.setToolTipText(MessagesUtil.getI18nMessage("Fill in the fully qualified name of the provider"));
-        addProvider.addMouseListener(new MouseAdapter() {
+        JBTextField providerTf = new JBTextField();
+        providerTf.setToolTipText(MessagesUtil.getI18nMessage("fill in the fully qualified name of the provider"));
+        JBTextField pathTf = new JBTextField();
+        pathTf.setEnabled(false);
+        JButton fileBtn = new JButton(MessagesUtil.getI18nMessage("choose file"));
+        fileBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 String jarFilePath = FileChooserUtil.pathFilechooser(
                         new FileChooserUtil.ChooserDescBuilder().setChooseFiles(true).setChooseJars(true).build(),
                         null,
                         null);
-                ServiceManager.getService(JceServiceImpl.class).loadProviderJar(jarFilePath, jbTextField.getText());
+                pathTf.setText(jarFilePath);
             }
         });
+        JButton addProvider = new JButton(MessagesUtil.getI18nMessage("add"));
+        addProvider.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                ServiceManager.getService(JceServiceImpl.class).loadProviderJar(pathTf.getText(), providerTf.getText());
+                providerTf.setText(null);
+                pathTf.setText(null);
+            }
+        });
+        refreshProviderList();
         JPanel extendConfigPanel = new ConfigUI(MessagesUtil.getI18nMessage("extend"))
+                .addLineComponent("provider:", providerTf)
+                .addLineComponent(null, pathTf, fileBtn)
                 .addLineComponent(null, addProvider)
-                .addLineComponent("provider:", jbTextField)
-                .addLineComponent(null, new JBScrollPane(new JBList<>(jbLabels)))
+                .addLineComponent(null, new JBScrollPane(jbList))
                 .getConfigPanel();
         this.jPanel = FormBuilder.createFormBuilder()
                 .addComponent(systemConfigPanel)
                 .addComponent(extendConfigPanel)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+    }
+
+    public void refreshProviderList() {
+        String[] jbLabels = Arrays.stream(ServiceManager.getService(JceServiceImpl.class).getProviders())
+                .map(provider -> provider.getName() + " -> " + provider.getClass().getName())
+                .toArray(String[]::new);
+        this.jbList.setListData(jbLabels);
+    }
+
+    public static ConfigPanel getInstance() {
+        return SINGLETON;
     }
 
     public JPanel getPanel() {

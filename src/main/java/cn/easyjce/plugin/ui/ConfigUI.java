@@ -29,14 +29,16 @@ public class ConfigUI {
         JPanel jPanel = new JPanel(new GridBagLayout());
         if (existLabel) {
             GBC constraints = new GBC(0, 0)
-                    .setWeight(0, 0)
+                    .setWeight(0, 0, () -> true)
                     .setFill(GridBagConstraints.NONE, () -> true);
             jPanel.add(new JBLabel(label), constraints);
         }
         for (int i = 0; i < components.length; i++) {
             JComponent component = components[i];
             GBC constraints = new GBC(existLabel ? i + 1 : i, 0)
-                    .setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton);
+                    .setWeight(0, 0, () -> components.length > 1 && component instanceof JButton)
+                    .setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton)
+                    .setAnchor(GridBagConstraints.EAST, () -> components.length > 1 && component instanceof JButton);
             jPanel.add(component, constraints);
         }
         this.formBuilder.addComponent(jPanel);

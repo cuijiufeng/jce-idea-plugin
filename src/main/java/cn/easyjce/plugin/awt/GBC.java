@@ -15,7 +15,7 @@ public class GBC extends GridBagConstraints {
     public GBC(int gridx, int gridy) {
         this.gridx = gridx;
         this.gridy = gridy;
-        setWeight(1.0, 0);
+        setWeight(1.0, 0, () -> true);
         setFill(GridBagConstraints.HORIZONTAL, () -> true);
         setAnchor(GridBagConstraints.WEST, () -> true);
     }
@@ -26,7 +26,7 @@ public class GBC extends GridBagConstraints {
         this.gridy = gridy;
         this.gridwidth = gridwidth;
         this.gridheight = gridheight;
-        setWeight(1.0, 0);
+        setWeight(1.0, 0, () -> true);
         setFill(GridBagConstraints.HORIZONTAL, () -> true);
         setAnchor(GridBagConstraints.WEST, () -> true);
     }
@@ -48,9 +48,11 @@ public class GBC extends GridBagConstraints {
     }
 
     //x和y方向上的增量
-    public GBC setWeight(double weightx, double weighty) {
-        this.weightx = weightx;
-        this.weighty = weighty;
+    public GBC setWeight(double weightx, double weighty, BooleanSupplier supplier) {
+        if (supplier.getAsBoolean()) {
+            this.weightx = weightx;
+            this.weighty = weighty;
+        }
         return this;
     }
 

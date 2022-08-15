@@ -14,7 +14,7 @@ import javax.swing.*;
  * @author: cuijiufeng
  */
 public class JcePluginConfigurable implements Configurable {
-    private ConfigPanel configPanel;
+    private ConfigPanel configPanel = ConfigPanel.getInstance();
 
     @Override
     public String getDisplayName() {
@@ -23,7 +23,7 @@ public class JcePluginConfigurable implements Configurable {
 
     @Override
     public @Nullable JComponent createComponent() {
-        return (this.configPanel = new ConfigPanel()).getPanel();
+        return this.configPanel.getPanel();
     }
 
     @Override

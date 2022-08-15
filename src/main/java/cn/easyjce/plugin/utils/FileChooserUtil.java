@@ -19,7 +19,7 @@ public class FileChooserUtil {
         if (Objects.isNull(virtualFile)) {
             return null;
         }
-        return virtualFile.getPath();
+        return virtualFile.getPath().split("!/")[0];
     }
 
     public static class ChooserDescBuilder {

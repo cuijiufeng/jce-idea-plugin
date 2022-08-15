@@ -3,10 +3,14 @@ package cn.easyjce.plugin.service.impl;
 import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
+import cn.easyjce.plugin.ui.ConfigPanel;
+import cn.easyjce.plugin.ui.MainUI;
 import cn.easyjce.plugin.utils.LogUtil;
+import cn.easyjce.plugin.utils.MessagesUtil;
 import cn.easyjce.plugin.utils.NotificationsUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.ui.Messages;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -18,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Class: JceServiceImpl
@@ -62,15 +67,31 @@ public final class JceServiceImpl {
     }
 
     public void loadProviderJar(String path, String provider) {
-        if (StringUtils.isBlank(path)) {
+        if (StringUtils.isBlank(path) || StringUtils.isBlank(provider)) {
+            Messages.showWarningDialog(MessagesUtil.getI18nMessage("select the JCE jar package and fill in the provider class name"), "Tip");
             return;
         }
         try {
             URLClassLoader classLoader = new URLClassLoader(new URL[]{ new File(path).toURI().toURL() });
-            classLoader.loadClass("");
-        } catch (MalformedURLException | ClassNotFoundException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, "provider load failed");
-            LogUtil.LOG.warn(e);
+            @SuppressWarnings("unchecked")
+            Class<Provider> providerClass = (Class<Provider>) classLoader.loadClass(provider);
+            //动态加载provider
+            Provider providerInstance = providerClass.newInstance();
+            if (Objects.nonNull(Security.getProvider(providerInstance.getName()))) {
+                Messages.showInfoMessage(MessagesUtil.getI18nMessage("load provider repeatedly"), "Tip");
+                return;
+            }
+            Security.addProvider(providerInstance);
+            ConfigPanel.getInstance().refreshProviderList();
+            MainUI.getInstance().reloadProviderSelect(getProviders());
+            Messages.showInfoMessage(MessagesUtil.getI18nMessage("success"), "Tip");
+        } catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            LogUtil.LOG.warn(e.getMessage());
+            //DialogWrapper使用。MessageDialog extends DialogWrapper
+            Messages.showErrorDialog(MessagesUtil.getI18nMessage("provider load failed"), "Tip");
+        }  catch (Throwable e) {
+            LogUtil.LOG.error(e);
+            Messages.showErrorDialog(MessagesUtil.getI18nMessage("unknown error"), "Tip");
         }
     }
 }
