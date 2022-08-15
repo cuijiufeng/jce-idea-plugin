@@ -7,8 +7,13 @@ import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.NotificationsUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.Security;
@@ -54,5 +59,18 @@ public final class JceServiceImpl {
             LogUtil.LOG.error(e);
         }
         return null;
+    }
+
+    public void loadProviderJar(String path, String provider) {
+        if (StringUtils.isBlank(path)) {
+            return;
+        }
+        try {
+            URLClassLoader classLoader = new URLClassLoader(new URL[]{ new File(path).toURI().toURL() });
+            classLoader.loadClass("");
+        } catch (MalformedURLException | ClassNotFoundException e) {
+            NotificationsUtil.showNotice(NotificationType.ERROR, "provider load failed");
+            LogUtil.LOG.warn(e);
+        }
     }
 }

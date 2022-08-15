@@ -1,6 +1,8 @@
 package cn.easyjce.plugin.ui;
 
+import cn.easyjce.plugin.awt.GBC;
 import com.intellij.util.ui.FormBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,37 +13,35 @@ import java.awt.*;
  * @author: cuijiufeng
  */
 public class ConfigUI {
-    private final FormBuilder formBuilder;
     private JPanel configPanel;
     private JLabel title;
     private JPanel content;
+    private final FormBuilder formBuilder = FormBuilder.createFormBuilder();
 
     public ConfigUI(String title) {
         this.title.setText(title);
-        this.formBuilder = FormBuilder.createFormBuilder();
+        this.content.add(this.formBuilder.getPanel(), BorderLayout.CENTER);
     }
 
-    public ConfigUI addLineComponent(JComponent ... component) {
-        JPanel jPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        for (JComponent jComponent : component) {
-            jPanel.add(jComponent);
+    public ConfigUI addLineComponent(String label, JComponent ... components) {
+        JPanel jPanel = new JPanel(new GridBagLayout());
+        if (StringUtils.isNotBlank(label)) {
+            JLabel component = new JLabel(label + ":");
+            component.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
+            jPanel.add(component, new GBC(0, 0, 1, 1).setFill(GridBagConstraints.NONE, () -> true));
         }
-        formBuilder.addComponent(jPanel);
-        return this;
-    }
-
-    public ConfigUI addLineComponent(String label, JComponent ... component) {
-        JPanel jPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        jPanel.add(new JLabel(label + ":"));
-        for (JComponent jComponent : component) {
-            jPanel.add(jComponent);
+        for (int i = 0; i < components.length; i++) {
+            JComponent component = components[i];
+            int x = StringUtils.isNotBlank(label) ? 2 * i + 1 : 2 * i;
+            GBC constraints = new GBC(x, 0, 2, 1).setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton);
+            component.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
+            jPanel.add(component, constraints);
         }
-        formBuilder.addComponent(jPanel);
+        this.formBuilder.addComponent(jPanel);
         return this;
     }
 
     public JPanel getConfigPanel() {
-        content.add(formBuilder.getPanel(), BorderLayout.CENTER);
-        return configPanel;
+        return this.configPanel;
     }
 }
