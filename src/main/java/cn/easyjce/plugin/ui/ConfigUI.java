@@ -1,6 +1,7 @@
 package cn.easyjce.plugin.ui;
 
 import cn.easyjce.plugin.awt.GBC;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,17 +25,18 @@ public class ConfigUI {
     }
 
     public ConfigUI addLineComponent(String label, JComponent ... components) {
+        boolean existLabel = StringUtils.isNotBlank(label);
         JPanel jPanel = new JPanel(new GridBagLayout());
-        if (StringUtils.isNotBlank(label)) {
-            JLabel component = new JLabel(label + ":");
-            component.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
-            jPanel.add(component, new GBC(0, 0, 1, 1).setFill(GridBagConstraints.NONE, () -> true));
+        if (existLabel) {
+            GBC constraints = new GBC(0, 0)
+                    .setWeight(0, 0)
+                    .setFill(GridBagConstraints.NONE, () -> true);
+            jPanel.add(new JBLabel(label), constraints);
         }
         for (int i = 0; i < components.length; i++) {
             JComponent component = components[i];
-            int x = StringUtils.isNotBlank(label) ? 2 * i + 1 : 2 * i;
-            GBC constraints = new GBC(x, 0, 2, 1).setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton);
-            component.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
+            GBC constraints = new GBC(existLabel ? i + 1 : i, 0)
+                    .setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton);
             jPanel.add(component, constraints);
         }
         this.formBuilder.addComponent(jPanel);

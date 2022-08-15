@@ -38,8 +38,8 @@ public class ConfigPanel {
         ButtonGroup outputBg = new ButtonGroup();
         this.outputComponents.forEach(outputBg::add);
         JPanel systemConfigPanel = new ConfigUI(MessagesUtil.getI18nMessage("system"))
-                .addLineComponent(MessagesUtil.getI18nMessage("input code"), inputComponents.toArray(new JComponent[0]))
-                .addLineComponent(MessagesUtil.getI18nMessage("output code"), outputComponents.toArray(new JComponent[0]))
+                .addLineComponent(MessagesUtil.getI18nMessage("input code") + ":", inputComponents.toArray(new JComponent[0]))
+                .addLineComponent(MessagesUtil.getI18nMessage("output code") + ":", outputComponents.toArray(new JComponent[0]))
                 .getConfigPanel();
         String[] jbLabels = Arrays.stream(ServiceManager.getService(JceServiceImpl.class).getProviders())
                 .map(provider -> provider.getName() + " -> " + provider.getClass().getName())
@@ -59,7 +59,7 @@ public class ConfigPanel {
         });
         JPanel extendConfigPanel = new ConfigUI(MessagesUtil.getI18nMessage("extend"))
                 .addLineComponent(null, addProvider)
-                .addLineComponent("provider name", jbTextField)
+                .addLineComponent("provider:", jbTextField)
                 .addLineComponent(null, new JBScrollPane(new JBList<>(jbLabels)))
                 .getConfigPanel();
         this.jPanel = FormBuilder.createFormBuilder()

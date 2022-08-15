@@ -15,7 +15,11 @@ import java.util.Objects;
 public class FileChooserUtil {
 
     public static String pathFilechooser(FileChooserDescriptor descriptor, Project project, VirtualFile toSelect) {
-        return Objects.requireNonNull(FileChooser.chooseFile(descriptor, project, toSelect)).getPath();
+        VirtualFile virtualFile = FileChooser.chooseFile(descriptor, project, toSelect);
+        if (Objects.isNull(virtualFile)) {
+            return null;
+        }
+        return virtualFile.getPath();
     }
 
     public static class ChooserDescBuilder {
