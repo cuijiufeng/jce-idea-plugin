@@ -12,14 +12,27 @@ import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.UnrecoverableEntryException;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Class: JceSpec
@@ -205,7 +218,9 @@ public enum JceSpec implements IJceSpec {
         @Override
         public List<Parameter<?>> params(String algorithm) {
             Parameter<String> parameter = new JRadioButtonParameter("type", Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"), 2);
-            return Arrays.asList(parameter, new JTextFieldParameter("key", null, () -> true));
+            return Arrays.asList(parameter,
+                    new JTextFieldParameter("key", null, () -> true),
+                    new JTextFieldParameter("nounce", null, () -> parameter.getValue().equals("symmetric encryption") || parameter.getValue().equals("symmetric decryption")));
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException {
@@ -215,15 +230,28 @@ public enum JceSpec implements IJceSpec {
                     .isNotBlank()
                     .in(Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"))
                     .get();
-            //TODO 2022/8/8 17:22 对称加密可以使用向量iv
             String keyParam = new StringValidate("key", params.get("key")).isNotBlank().get();
             byte[] keyBytes = service.decode(CodecServiceImpl.IO.IN, keyParam);
             if ("symmetric encryption".equals(type)) {
                 SecretKey secretKey = new SecretKeySpec(keyBytes, algorithm.split("/")[0].split("_")[0]);
-                instance.init(javax.crypto.Cipher.ENCRYPT_MODE, secretKey);
+                StringValidate nounceParam = new StringValidate("nounce", params.get("nounce"));
+                if (nounceParam.isNotBlankNoEx()) {
+                    instance.init(javax.crypto.Cipher.ENCRYPT_MODE,
+                            secretKey,
+                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, nounceParam.get())));
+                } else {
+                    instance.init(javax.crypto.Cipher.ENCRYPT_MODE, secretKey);
+                }
             } else if ("symmetric decryption".equals(type)) {
                 SecretKey secretKey = new SecretKeySpec(keyBytes, algorithm.split("/")[0].split("_")[0]);
-                instance.init(javax.crypto.Cipher.DECRYPT_MODE, secretKey);
+                StringValidate nounceParam = new StringValidate("nounce", params.get("nounce"));
+                if (nounceParam.isNotBlankNoEx()) {
+                    instance.init(javax.crypto.Cipher.DECRYPT_MODE,
+                            secretKey,
+                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, nounceParam.get())));
+                } else {
+                    instance.init(javax.crypto.Cipher.DECRYPT_MODE, secretKey);
+                }
             } else if ("asymmetric encryption".equals(type)) {
                 Key key;
                 try {
