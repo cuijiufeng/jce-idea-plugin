@@ -8,7 +8,9 @@ import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.event.ParameterUIEvent;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
+import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.NotificationsUtil;
+import cn.easyjce.plugin.utils.ReflectionUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.ui.components.JBLabel;
@@ -117,7 +119,16 @@ public class MainUI {
             if (ItemEvent.SELECTED == event.getStateChange()) {
                 TypeCombo type = (TypeCombo) typeSelect.getSelectedItem();
                 AlgorithmCombo item = (AlgorithmCombo) event.getItem();
-                reviewParameterUI(this.paramsList = JceSpec.valueOf(type.getType()).params(item.getAlgorithm()));
+                try {
+                    //noinspection ConstantConditions
+                    reviewParameterUI(this.paramsList = JceSpec.valueOf(type.getType()).params(item.getAlgorithm()));
+                } catch (IllegalArgumentException e) {
+                    try {
+                        ReflectionUtil.addEnum(JceSpec.class, type.getType());
+                    } catch (Throwable throwable) {
+                        LogUtil.LOG.error(throwable);
+                    }
+                }
             }
         });
         clear.addMouseListener(new MouseAdapter() {
@@ -127,7 +138,6 @@ public class MainUI {
             }
         });
         compute.addMouseListener(new MouseAdapter() {
-            @SuppressWarnings("ConstantConditions")
             @Override
             public void mouseClicked(MouseEvent e) {
                 ProviderCombo providerSelected = (ProviderCombo) providerSelect.getSelectedItem();
@@ -137,6 +147,7 @@ public class MainUI {
                 Map<String, ?> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
                 JceServiceImpl service = ServiceManager.getService(JceServiceImpl.class);
                 try {
+                    //noinspection ConstantConditions
                     output.setText(service.execute(typeSelected.getType(), algoSelected.getAlgorithm(), providerSelected.getProvider(), input.getText(), paramsMap));
                 } catch (NullPointerException ex) {
                     NotificationsUtil.showNotice(NotificationType.ERROR, "please select the correct type and algorithm");
