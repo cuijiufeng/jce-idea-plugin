@@ -29,6 +29,9 @@ public class JButtonParameter extends Parameter<String> {
         this.button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) {
+                    return;
+                }
                 filePath = FileChooserUtil.pathFilechooser(
                         new FileChooserUtil.ChooserDescBuilder().setChooseFiles(true).build(),
                         null,

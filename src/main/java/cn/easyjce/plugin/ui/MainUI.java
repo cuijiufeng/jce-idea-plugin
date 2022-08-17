@@ -124,12 +124,18 @@ public class MainUI {
         clear.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) {
+                    return;
+                }
                 clear();
             }
         });
         compute.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) {
+                    return;
+                }
                 ProviderCombo providerSelected = (ProviderCombo) providerSelect.getSelectedItem();
                 TypeCombo typeSelected = (TypeCombo) typeSelect.getSelectedItem();
                 AlgorithmCombo algoSelected = (AlgorithmCombo) algorithmSelect.getSelectedItem();

@@ -34,5 +34,6 @@
             <action id="config.action" class="cn.easyjce.plugin.actions.ConfigAction"/>
             <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
         </group>
+        <group id="jce.popup.config.history"/>
     </actions>
 </idea-plugin>

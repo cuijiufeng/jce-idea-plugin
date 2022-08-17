@@ -63,10 +63,10 @@ public final class JceServiceImpl {
         return null;
     }
 
-    public void loadProviderJar(String path, String provider) {
+    public boolean loadProviderJar(String path, String provider) {
         if (StringUtils.isBlank(path) || StringUtils.isBlank(provider)) {
             Messages.showWarningDialog(MessagesUtil.getI18nMessage("select the JCE jar package and fill in the provider class name"), "Tip");
-            return;
+            return false;
         }
         try {
             URLClassLoader classLoader = new URLClassLoader(new URL[]{ new File(path).toURI().toURL() });
@@ -76,11 +76,12 @@ public final class JceServiceImpl {
             Provider providerInstance = providerClass.newInstance();
             if (Objects.nonNull(Security.getProvider(providerInstance.getName()))) {
                 Messages.showInfoMessage(MessagesUtil.getI18nMessage("load provider repeatedly"), "Tip");
-                return;
+                return false;
             }
             Security.addProvider(providerInstance);
             MainUI.getInstance().reloadProviderSelect(getProviders());
             Messages.showInfoMessage(MessagesUtil.getI18nMessage("success"), "Tip");
+            return true;
         } catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             LogUtil.LOG.warn(e.getMessage());
             //DialogWrapper使用。MessageDialog extends DialogWrapper
@@ -89,5 +90,6 @@ public final class JceServiceImpl {
             LogUtil.LOG.error(e);
             Messages.showErrorDialog(MessagesUtil.getI18nMessage("unknown error"), "Tip");
         }
+        return false;
     }
 }
