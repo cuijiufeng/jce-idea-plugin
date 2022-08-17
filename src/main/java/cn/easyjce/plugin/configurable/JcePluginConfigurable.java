@@ -14,7 +14,7 @@ import javax.swing.*;
  * @author: cuijiufeng
  */
 public class JcePluginConfigurable implements Configurable {
-    private ConfigPanel configPanel = ConfigPanel.getInstance();
+    private ConfigPanel configPanel;
 
     @Override
     public String getDisplayName() {
@@ -23,7 +23,7 @@ public class JcePluginConfigurable implements Configurable {
 
     @Override
     public @Nullable JComponent createComponent() {
-        return this.configPanel.getPanel();
+        return (this.configPanel = new ConfigPanel()).getPanel();
     }
 
     @Override
@@ -35,12 +35,14 @@ public class JcePluginConfigurable implements Configurable {
     public void apply() throws ConfigurationException {
         JcePluginState.getInstance().setInputRb(this.configPanel.getInputConfigValue());
         JcePluginState.getInstance().setOutputRb(this.configPanel.getOutputConfigValue());
+        JcePluginState.getInstance().setHistorys(this.configPanel.getAddHistoryConfigValue());
     }
 
     @Override
     public void reset() {
         this.configPanel.setInputConfigValue(JcePluginState.getInstance().getInputRb());
         this.configPanel.setOutputConfigValue(JcePluginState.getInstance().getOutputRb());
+        this.configPanel.setAddHistoryConfigValue(JcePluginState.getInstance().getHistorys());
     }
 
     @Override

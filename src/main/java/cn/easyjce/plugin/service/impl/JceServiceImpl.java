@@ -3,7 +3,6 @@ package cn.easyjce.plugin.service.impl;
 import cn.easyjce.plugin.exception.OperationIllegalException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
-import cn.easyjce.plugin.ui.ConfigPanel;
 import cn.easyjce.plugin.ui.MainUI;
 import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.MessagesUtil;
@@ -80,7 +79,6 @@ public final class JceServiceImpl {
                 return;
             }
             Security.addProvider(providerInstance);
-            ConfigPanel.getInstance().refreshProviderList();
             MainUI.getInstance().reloadProviderSelect(getProviders());
             Messages.showInfoMessage(MessagesUtil.getI18nMessage("success"), "Tip");
         } catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
