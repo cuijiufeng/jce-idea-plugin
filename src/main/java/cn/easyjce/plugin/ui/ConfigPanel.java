@@ -15,6 +15,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.testFramework.MapDataContext;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
@@ -40,6 +41,7 @@ public class ConfigPanel {
     public static final DefaultActionGroup actionGroup = (DefaultActionGroup) ActionManager.getInstance().getAction(PluginConstants.POPUP_CONFIG_ID);
     public static final int HISTORY_LIST_MAX_COUNT = 16;
     private final JPanel jPanel;
+    private final JBCheckBox welcomeNoti = new JBCheckBox(MessagesUtil.getI18nMessage("welcome notice"));
     private final List<JRadioButton> inputComponents = Arrays.asList(
             new JRadioButton(JcePluginState.RbValueEnum.string.name()),
             new JRadioButton(JcePluginState.RbValueEnum.hex.name()),
@@ -56,6 +58,7 @@ public class ConfigPanel {
         ButtonGroup outputBg = new ButtonGroup();
         this.outputComponents.forEach(outputBg::add);
         JPanel systemConfigPanel = new ConfigUI(MessagesUtil.getI18nMessage("system"))
+                .addLineComponent(null, welcomeNoti)
                 .addLineComponent(MessagesUtil.getI18nMessage("input code") + ":", inputComponents.toArray(new JComponent[0]))
                 .addLineComponent(MessagesUtil.getI18nMessage("output code") + ":", outputComponents.toArray(new JComponent[0]))
                 .getConfigPanel();
@@ -154,10 +157,15 @@ public class ConfigPanel {
     }
 
     public boolean isModified() {
+        boolean welcomNotiEquals = getWelcomeNotiConfigValue().equals(JcePluginState.getInstance().isWelcomeNoti());
         boolean intputRbEquals = getInputConfigValue().equals(JcePluginState.getInstance().getInputRb());
         boolean outtputRbEquals = getOutputConfigValue().equals(JcePluginState.getInstance().getOutputRb());
         boolean historysEquals = getAddHistoryConfigValue().equals(JcePluginState.getInstance().getHistorys());
-        return !(intputRbEquals && outtputRbEquals && historysEquals);
+        return !(welcomNotiEquals && intputRbEquals && outtputRbEquals && historysEquals);
+    }
+
+    public Boolean getWelcomeNotiConfigValue() {
+        return this.welcomeNoti.isSelected();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -186,6 +194,10 @@ public class ConfigPanel {
             result.add(this.addHistoryComponents.getModel().getElementAt(i));
         }
         return result;
+    }
+
+    public void setWelcomeNotiConfigValue(Boolean select) {
+        this.welcomeNoti.setSelected(select);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

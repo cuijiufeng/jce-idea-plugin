@@ -33,6 +33,7 @@ public class JcePluginConfigurable implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
+        JcePluginState.getInstance().setWelcomeNoti(this.configPanel.getWelcomeNotiConfigValue());
         JcePluginState.getInstance().setInputRb(this.configPanel.getInputConfigValue());
         JcePluginState.getInstance().setOutputRb(this.configPanel.getOutputConfigValue());
         JcePluginState.getInstance().setHistorys(this.configPanel.getAddHistoryConfigValue());
@@ -40,6 +41,7 @@ public class JcePluginConfigurable implements Configurable {
 
     @Override
     public void reset() {
+        this.configPanel.setWelcomeNotiConfigValue(JcePluginState.getInstance().isWelcomeNoti());
         this.configPanel.setInputConfigValue(JcePluginState.getInstance().getInputRb());
         this.configPanel.setOutputConfigValue(JcePluginState.getInstance().getOutputRb());
         this.configPanel.setAddHistoryConfigValue(JcePluginState.getInstance().getHistorys());

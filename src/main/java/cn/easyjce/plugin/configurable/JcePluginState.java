@@ -21,6 +21,7 @@ import java.util.List;
 @State(name = "JcePluginSetting", storages = @Storage(PluginConstants.SETTING_FILE))
 public class JcePluginState implements PersistentStateComponent<JcePluginState> {
     //设置配置初始默认值
+    private boolean welcomeNoti = true;
     @OptionTag(converter = RbValueConverter.class)
     private RbValueEnum inputRb = RbValueEnum.hex;
     @OptionTag(converter = RbValueConverter.class)
@@ -64,6 +65,14 @@ public class JcePluginState implements PersistentStateComponent<JcePluginState> 
 
     public void setHistorys(List<String> historys) {
         this.historys = historys;
+    }
+
+    public Boolean isWelcomeNoti() {
+        return welcomeNoti;
+    }
+
+    public void setWelcomeNoti(Boolean welcomeNoti) {
+        this.welcomeNoti = welcomeNoti;
     }
 
     public enum RbValueEnum {
