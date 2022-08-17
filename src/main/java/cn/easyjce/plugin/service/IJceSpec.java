@@ -1,17 +1,11 @@
 package cn.easyjce.plugin.service;
 
 import cn.easyjce.plugin.beans.Parameter;
-import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
-import cn.easyjce.plugin.utils.LogUtil;
-import cn.easyjce.plugin.validate.ByteArrValidate;
+import cn.easyjce.plugin.exception.OperationIllegalException;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.GeneralSecurityException;
+import java.security.Provider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,47 +23,6 @@ public interface IJceSpec {
 
     default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
             throws GeneralSecurityException, IOException {
-        throw new JceUnsupportedOperationException("unsupported operation");
-    }
-
-    default SecretKey parseSecretKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
-        javax.crypto.SecretKeyFactory keyFactory = javax.crypto.SecretKeyFactory.getInstance(algorithm, provider);
-        byte[] key = new ByteArrValidate("key", bytes).isNotEmpty().get();
-        return keyFactory.generateSecret(new SecretKeySpec(key, algorithm));
-    }
-
-    default PrivateKey parsePrivateKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
-        java.security.KeyFactory instance;
-        try {
-            instance = java.security.KeyFactory.getInstance(algorithm, provider);
-        } catch (NoSuchAlgorithmException e) {
-            instance = java.security.KeyFactory.getInstance(algorithm);
-            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
-        }
-        byte[] priv = new ByteArrValidate("private key", bytes).isNotEmpty().get();
-        return instance.generatePrivate(new PKCS8EncodedKeySpec(priv));
-    }
-
-    default PublicKey parsePublicKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
-        java.security.KeyFactory instance;
-        try {
-            instance = java.security.KeyFactory.getInstance(algorithm, provider);
-        } catch (NoSuchAlgorithmException e) {
-            instance = java.security.KeyFactory.getInstance(algorithm);
-            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
-        }
-        byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();;
-        return instance.generatePublic(new X509EncodedKeySpec(pub));
-    }
-
-    default KeyStore loadKeyStore(String algorithm, Provider provider, InputStream is, String password) throws GeneralSecurityException, IOException {
-        KeyStore keyStore;
-        try {
-            keyStore = KeyStore.getInstance(algorithm, provider);
-        } catch (KeyStoreException e) {
-            keyStore = KeyStore.getInstance(algorithm);
-        }
-        keyStore.load(is, password.toCharArray());
-        return keyStore;
+        throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
 }

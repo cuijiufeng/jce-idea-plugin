@@ -8,9 +8,7 @@ import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.event.ParameterUIEvent;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
-import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.NotificationsUtil;
-import cn.easyjce.plugin.utils.ReflectionUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.ui.components.JBLabel;
@@ -119,16 +117,8 @@ public class MainUI {
             if (ItemEvent.SELECTED == event.getStateChange()) {
                 TypeCombo type = (TypeCombo) typeSelect.getSelectedItem();
                 AlgorithmCombo item = (AlgorithmCombo) event.getItem();
-                try {
-                    //noinspection ConstantConditions
-                    reviewParameterUI(this.paramsList = JceSpec.valueOf(type.getType()).params(item.getAlgorithm()));
-                } catch (IllegalArgumentException e) {
-                    try {
-                        ReflectionUtil.addEnum(JceSpec.class, type.getType());
-                    } catch (Throwable throwable) {
-                        LogUtil.LOG.error(throwable);
-                    }
-                }
+                //noinspection ConstantConditions
+                reviewParameterUI(this.paramsList = JceSpec.specValueOf(type.getType(), null).params(item.getAlgorithm()));
             }
         });
         clear.addMouseListener(new MouseAdapter() {

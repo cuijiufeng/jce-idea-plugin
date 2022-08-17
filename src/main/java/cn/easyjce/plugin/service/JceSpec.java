@@ -4,9 +4,10 @@ import cn.easyjce.plugin.beans.JButtonParameter;
 import cn.easyjce.plugin.beans.JRadioButtonParameter;
 import cn.easyjce.plugin.beans.JTextFieldParameter;
 import cn.easyjce.plugin.beans.Parameter;
-import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
+import cn.easyjce.plugin.exception.OperationIllegalException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.impl.CodecServiceImpl;
+import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.validate.ByteArrValidate;
 import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
@@ -16,23 +17,29 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Class: JceSpec
@@ -40,6 +47,7 @@ import java.util.Map;
  * @author: cuijiufeng
  */
 public enum JceSpec implements IJceSpec {
+    DEFAULT,
     SecureRandom {
         @Override
         public List<Parameter<?>> params(String algorithm) {
@@ -113,10 +121,6 @@ public enum JceSpec implements IJceSpec {
         }
     },
     SecretKeyFactory {
-        @Override
-        public List<Parameter<?>> params(String algorithm) {
-            return super.params(algorithm);
-        }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException, IOException {
             SecretKey secretKey = parseSecretKey(algorithm, provider, inputBytes);
@@ -201,7 +205,7 @@ public enum JceSpec implements IJceSpec {
                     byte[] pub = service.decode(CodecServiceImpl.IO.IN, stringValidate.get());
                     instance.initVerify(parsePublicKey(algorithm.split("with")[1], provider, pub));
                 } else if (new StringValidate("cert", params.get("cert")).isNotBlankNoEx()) {
-                    throw new JceUnsupportedOperationException("unsupported cert");
+                    throw new OperationIllegalException("unsupported cert");
                 } else {
                     throw new ParameterIllegalException("{0} parameter is empty", "cert、public");
                 }
@@ -337,7 +341,7 @@ public enum JceSpec implements IJceSpec {
                 BigInteger r = new BigInteger(new StringValidate("g", params.get("g")).isNotBlank().get(), 16);
                 instance.init(new DSAParameterSpec(p, q, r));
             } else {
-                throw new JceUnsupportedOperationException("unsupported algorithm");
+                throw new OperationIllegalException("unsupported algorithm");
             }
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("output", instance.getEncoded());
@@ -357,4 +361,57 @@ public enum JceSpec implements IJceSpec {
     TerminalFactory,
     KeyInfoFactory
     ;
+
+    protected SecretKey parseSecretKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
+        javax.crypto.SecretKeyFactory keyFactory = javax.crypto.SecretKeyFactory.getInstance(algorithm, provider);
+        byte[] key = new ByteArrValidate("key", bytes).isNotEmpty().get();
+        return keyFactory.generateSecret(new SecretKeySpec(key, algorithm));
+    }
+
+    protected PrivateKey parsePrivateKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
+        java.security.KeyFactory instance;
+        try {
+            instance = java.security.KeyFactory.getInstance(algorithm, provider);
+        } catch (NoSuchAlgorithmException e) {
+            instance = java.security.KeyFactory.getInstance(algorithm);
+            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
+        }
+        byte[] priv = new ByteArrValidate("private key", bytes).isNotEmpty().get();
+        return instance.generatePrivate(new PKCS8EncodedKeySpec(priv));
+    }
+
+    protected PublicKey parsePublicKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
+        java.security.KeyFactory instance;
+        try {
+            instance = java.security.KeyFactory.getInstance(algorithm, provider);
+        } catch (NoSuchAlgorithmException e) {
+            instance = java.security.KeyFactory.getInstance(algorithm);
+            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
+        }
+        byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();;
+        return instance.generatePublic(new X509EncodedKeySpec(pub));
+    }
+
+    protected KeyStore loadKeyStore(String algorithm, Provider provider, InputStream is, String password) throws GeneralSecurityException, IOException {
+        KeyStore instance;
+        try {
+            instance = java.security.KeyStore.getInstance(algorithm, provider);
+        } catch (KeyStoreException e) {
+            instance = java.security.KeyStore.getInstance(algorithm);
+            LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
+        }
+        instance.load(is, password.toCharArray());
+        return instance;
+    }
+
+    public static JceSpec specValueOf(String name, RuntimeException valueOfEx) {
+        try {
+            return valueOf(name);
+        } catch (IllegalArgumentException e) {
+            if (Objects.nonNull(valueOfEx)) {
+                throw valueOfEx;
+            }
+            return DEFAULT;
+        }
+    }
 }

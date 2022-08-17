@@ -1,6 +1,6 @@
 package cn.easyjce.plugin.service.impl;
 
-import cn.easyjce.plugin.exception.JceUnsupportedOperationException;
+import cn.easyjce.plugin.exception.OperationIllegalException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.ui.ConfigPanel;
@@ -37,8 +37,8 @@ public final class JceServiceImpl {
 
     public String execute(String type, String algorithm, Provider provider, String input, Map<String, ?> paramsMap) {
         CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
-        JceSpec jceSpec = JceSpec.valueOf(type);
         try {
+            JceSpec jceSpec = JceSpec.specValueOf(type, new OperationIllegalException("{0} is not supported", type));
             Map<String, Object> outputMap = jceSpec.executeInternal(algorithm, provider, service.decode(CodecServiceImpl.IO.IN, input), paramsMap);
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Object> entry : outputMap.entrySet()) {
@@ -52,10 +52,8 @@ public final class JceServiceImpl {
                 sb.append('\n');
             }
             return sb.toString();
-        } catch (ParameterIllegalException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage(), e.getParams());
-        } catch (JceUnsupportedOperationException e) {
-            NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
+        } catch (ParameterIllegalException | OperationIllegalException e) {
+            NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage(), e.getMsgParams());
         } catch (IllegalArgumentException | IOException | GeneralSecurityException e) {
             NotificationsUtil.showNotice(NotificationType.ERROR, e.getMessage());
             LogUtil.LOG.error(e);
