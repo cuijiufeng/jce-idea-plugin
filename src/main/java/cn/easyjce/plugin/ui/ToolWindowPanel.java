@@ -1,5 +1,6 @@
 package cn.easyjce.plugin.ui;
 
+import cn.easyjce.plugin.configurable.JcePluginState;
 import cn.easyjce.plugin.global.PluginConstants;
 import cn.easyjce.plugin.utils.NotificationsUtil;
 import com.intellij.notification.NotificationType;
@@ -32,6 +33,8 @@ public class ToolWindowPanel extends JPanel {
         //添加主体ui
         this.add(MainUI.getInstance().getMainPanel(), BorderLayout.CENTER);
 
-        NotificationsUtil.showNotice(NotificationType.INFORMATION, "welcome");
+        if (JcePluginState.getInstance().isWelcomeNoti()) {
+            NotificationsUtil.showNotice(NotificationType.INFORMATION, "welcome");
+        }
     }
 }
