@@ -13,7 +13,7 @@ public class ParameterUIEvent extends AbstractEvent {
     }
 
     @Override
-    public Parameter getSource() {
-        return  (Parameter) super.getSource();
+    public Parameter<?> getSource() {
+        return  (Parameter<?>) super.getSource();
     }
 }
