@@ -71,7 +71,7 @@ public class ConfigPanel {
         JButton addProvider = new JButton(MessagesUtil.getI18nMessage("add"));
         JPanel extendConfigPanel = new ConfigUI(MessagesUtil.getI18nMessage("extend"))
                 .addLineComponent("provider:", providerTf)
-                .addLineComponent(null, pathTf, fileBtn)
+                .addLineComponent("path:", pathTf, fileBtn)
                 .addLineComponent(null, addProvider)
                 .addLineComponent(null, new JBLabel(MessagesUtil.getI18nMessage("add history") + ":"))
                 .addLineComponent(null, new JBScrollPane(addHistoryComponents))
