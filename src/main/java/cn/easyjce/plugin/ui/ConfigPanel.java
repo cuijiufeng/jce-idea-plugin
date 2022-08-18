@@ -62,7 +62,7 @@ public class ConfigPanel {
                 .addLineComponent(MessagesUtil.getI18nMessage("input code") + ":", inputComponents.toArray(new JComponent[0]))
                 .addLineComponent(MessagesUtil.getI18nMessage("output code") + ":", outputComponents.toArray(new JComponent[0]))
                 .getConfigPanel();
-        this.addHistoryComponents.setToolTipText("double click to fill in");
+        this.addHistoryComponents.setToolTipText(MessagesUtil.getI18nMessage("double click to fill in"));
         JBTextField providerTf = new JBTextField();
         providerTf.setToolTipText(MessagesUtil.getI18nMessage("fill in the fully qualified name of the provider"));
         JBTextField pathTf = new JBTextField();
