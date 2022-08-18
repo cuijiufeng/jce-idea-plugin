@@ -350,7 +350,21 @@ public enum JceSpec implements IJceSpec {
     },
     CertPathBuilder,
     CertPathValidator,
-    CertificateFactory,
+    CertificateFactory {
+        @Override
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JButtonParameter("cert", "choose file"));
+        }
+        @Override
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
+                throws GeneralSecurityException, IOException {
+            java.security.cert.CertificateFactory instance = java.security.cert.CertificateFactory.getInstance(algorithm, provider);
+            String certParam = new StringValidate("cert", params.get("cert")).isNotBlank().get();
+            Map<String, Object> rs = new HashMap<>(2);
+            rs.put("output", instance.generateCertificate(new FileInputStream(certParam)));
+            return rs;
+        }
+    },
     Configuration,
     Policy,
     KeyAgreement,

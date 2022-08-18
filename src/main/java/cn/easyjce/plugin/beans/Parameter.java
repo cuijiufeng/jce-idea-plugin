@@ -11,12 +11,12 @@ import java.util.function.BooleanSupplier;
  */
 public abstract class Parameter<T> {
     private final String label;
-    private final int maxCol;
+    private final int maxRow;
     private final BooleanSupplier show;
 
-    public Parameter(String label, int maxCol, BooleanSupplier show) {
+    public Parameter(String label, int maxRow, BooleanSupplier show) {
         this.label = label;
-        this.maxCol = maxCol;
+        this.maxRow = maxRow;
         this.show = show;
     }
 
@@ -30,8 +30,8 @@ public abstract class Parameter<T> {
 
     public void clear() {};
 
-    public int getMaxCol() {
-        return this.maxCol;
+    public int getMaxRow() {
+        return this.maxRow;
     }
 
     public boolean isShow() {

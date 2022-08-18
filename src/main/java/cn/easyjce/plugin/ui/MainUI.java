@@ -1,5 +1,6 @@
 package cn.easyjce.plugin.ui;
 
+import cn.easyjce.plugin.awt.GBC;
 import cn.easyjce.plugin.beans.AlgorithmCombo;
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.beans.ProviderCombo;
@@ -161,9 +162,16 @@ public class MainUI {
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
         for (Parameter<?> parameter : paramsList) {
             if (parameter.isShow()) {
-                JPanel jPanel = new JPanel(new GridLayout(0, parameter.getMaxCol()));
-                parameter.getComponent().forEach(jPanel::add);
-                formBuilder.addLabeledComponent(new JBLabel(parameter.getKey()+":"), jPanel);
+                JPanel jPanel = new JPanel(new GridBagLayout());
+                for (int j = 0; j < parameter.getComponent().size(); j++) {
+                    JComponent component = parameter.getComponent().get(j);
+                    GBC constraints = new GBC(j % parameter.getMaxRow(), j / parameter.getMaxRow())
+                            .setWeight(0, 0, () -> parameter.getComponent().size() > 1 && component instanceof JButton)
+                            .setFill(GridBagConstraints.NONE, () -> component instanceof JComboBox || component instanceof JButton)
+                            .setAnchor(GridBagConstraints.EAST, () -> parameter.getComponent().size() > 1 && component instanceof JButton);
+                    jPanel.add(component, constraints);
+                }
+                formBuilder.addLabeledComponent(new JBLabel(parameter.getKey() + ":"), jPanel);
             }
         }
         params.add(formBuilder.getPanel(), BorderLayout.CENTER);
