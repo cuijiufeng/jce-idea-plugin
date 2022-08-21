@@ -46,6 +46,7 @@ import java.util.Objects;
  * @Date: 2022/7/27 9:22
  * @author: cuijiufeng
  */
+@SuppressWarnings("unused")
 public enum JceSpec implements IJceSpec {
     DEFAULT,
     SecureRandom {
@@ -122,7 +123,7 @@ public enum JceSpec implements IJceSpec {
     },
     SecretKeyFactory {
         @Override
-        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException, IOException {
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException {
             SecretKey secretKey = parseSecretKey(algorithm, provider, inputBytes);
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("key", secretKey);
@@ -310,7 +311,7 @@ public enum JceSpec implements IJceSpec {
     SaslServerFactory,
     AlgorithmParameterGenerator {
         @Override
-        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException, IOException {
+        public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params) throws GeneralSecurityException {
             java.security.AlgorithmParameterGenerator instance = java.security.AlgorithmParameterGenerator.getInstance(algorithm, provider);
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("output", instance.generateParameters());
@@ -402,7 +403,7 @@ public enum JceSpec implements IJceSpec {
             instance = java.security.KeyFactory.getInstance(algorithm);
             LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
         }
-        byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();;
+        byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();
         return instance.generatePublic(new X509EncodedKeySpec(pub));
     }
 
