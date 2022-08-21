@@ -22,9 +22,14 @@ public interface PluginConstants {
     String TOOL_BAR_ID = "jce.toolbar";
 
     /**
-     * toolbar id
+     * popup config
      */
     String POPUP_CONFIG_ID = "jce.popup.config.history";
+
+    /**
+     * popup generate
+     */
+    String POPUP_GENERATE_ID = "jce.popup.generate.history";
 
     /**
      * setting file

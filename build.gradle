@@ -6,17 +6,35 @@ plugins {
 group 'cn.easyjce.plugin'
 version '1.0-SNAPSHOT'
 
+//编码
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    // lombok 支持
+    //compileOnly 'org.projectlombok:lombok:1.18.2'
+    //annotationProcessor 'org.projectlombok:lombok:1.18.2'
+    //testAnnotationProcessor 'org.projectlombok:lombok:1.18.2'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
+    //插件名称
+    pluginName 'JcePlugin'
+    //默认在build文件下面
+    sandboxDirectory = "${rootProject.buildDir}/idea-sandbox"
     version '2020.1.2'
+    // 社区版
+    //type 'IC'
+    // 企业版
+    type 'IU'
 }
 
 patchPluginXml {
@@ -25,10 +43,4 @@ patchPluginXml {
     //最高支持的版本
     untilBuild ''
     changeNotes ""
-}
-
-//编译JAVA文件时采用UTF-8
-//noinspection GroovyAssignabilityCheck
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
 }

@@ -5,9 +5,9 @@
 
     <description>
         <![CDATA[
-        ========================================</br>
+        ========================================<br/>
         这是一个JCE idea快捷工具
-        ========================================</br>
+        ========================================<br/>
         ]]>
     </description>
 
@@ -35,5 +35,11 @@
             <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
         </group>
         <group id="jce.popup.config.history"/>
+        <group id="jce.popup.generate.history">
+            <action class="cn.easyjce.plugin.actions.generate.MessageDigestGenerateAction" text="MessageDigest"/>
+        </group>
+        <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="GenerateJceCode">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>
