@@ -14,6 +14,8 @@
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <!--依赖模块-->
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
@@ -35,10 +37,10 @@
             <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
         </group>
         <group id="jce.popup.config.history"/>
-        <group id="jce.popup.generate.history">
+        <group id="jce.popup.generate.code">
             <action class="cn.easyjce.plugin.actions.generate.MessageDigestGenerateAction" text="MessageDigest"/>
         </group>
-        <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="GenerateJceCode">
+        <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="Generate Jce Code">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
     </actions>

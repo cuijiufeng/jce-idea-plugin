@@ -35,6 +35,8 @@ intellij {
     //type 'IC'
     // 企业版
     type 'IU'
+    // 依赖的插件
+    plugins = ['java']
 }
 
 patchPluginXml {

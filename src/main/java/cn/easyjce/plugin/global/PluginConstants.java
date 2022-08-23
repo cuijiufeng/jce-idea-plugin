@@ -29,7 +29,7 @@ public interface PluginConstants {
     /**
      * popup generate
      */
-    String POPUP_GENERATE_ID = "jce.popup.generate.history";
+    String POPUP_GENERATE_ID = "jce.popup.generate.code";
 
     /**
      * setting file
