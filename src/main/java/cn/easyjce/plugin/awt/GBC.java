@@ -18,6 +18,7 @@ public class GBC extends GridBagConstraints {
         setWeight(1.0, 0, () -> true);
         setFill(GridBagConstraints.HORIZONTAL, () -> true);
         setAnchor(GridBagConstraints.WEST, () -> true);
+        setInsets(1);
     }
 
     //初始化左上角位置和所占行数和列数
@@ -29,6 +30,7 @@ public class GBC extends GridBagConstraints {
         setWeight(1.0, 0, () -> true);
         setFill(GridBagConstraints.HORIZONTAL, () -> true);
         setAnchor(GridBagConstraints.WEST, () -> true);
+        setInsets(1);
     }
 
     //对齐方式

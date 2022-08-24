@@ -8,9 +8,16 @@ import cn.easyjce.plugin.exception.OperationIllegalException;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.impl.CodecServiceImpl;
 import cn.easyjce.plugin.utils.LogUtil;
+import cn.easyjce.plugin.utils.PsiElementUtil;
 import cn.easyjce.plugin.validate.ByteArrValidate;
 import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.psi.CommonClassNames;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiType;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -19,12 +26,27 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.UnrecoverableEntryException;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Class: JceSpec
@@ -59,9 +81,49 @@ public enum JceSpec implements IJceSpec {
     },
     MessageDigest {
         @Override
+        public List<Parameter<?>> params(String algorithm) {
+            return Collections.singletonList(new JTextFieldParameter("salt", null, () -> true));
+        }
+        @Override
+        public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, ?> params) {
+            PsiElement parentElement = cursorElement.getParent();
+
+            //生成instance实例
+            PsiElement saltVariable = factory.createVariableDeclarationStatement("salt",
+                    factory.createTypeFromText(CommonClassNames.JAVA_LANG_STRING, null),
+                    factory.createExpressionFromText("\"" + params.get("salt") + "\"", null));
+            PsiElement dataVariable = factory.createVariableDeclarationStatement("data",
+                    factory.createTypeFromText(CommonClassNames.JAVA_LANG_STRING, null),
+                    factory.createExpressionFromText("\"" + input + "\"", null));
+            PsiElement mdVariable = factory.createVariableDeclarationStatement("md",
+                    factory.createTypeFromText("java.security.MessageDigest", null),
+                    factory.createExpressionFromText("MessageDigest.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            PsiElement mdinit = factory.createStatementFromText("md.update(x);", null);
+            ((PsiMethodCallExpression) mdinit.getFirstChild()).getArgumentList().getChildren()[1]
+                    .replace(PsiElementUtil.genHexDecode(factory, "salt"));
+
+            PsiExpression digestExp = factory.createExpressionFromText("md.digest(x)", null);
+            ((PsiMethodCallExpression) digestExp).getArgumentList().getChildren()[1]
+                    .replace(PsiElementUtil.genHexDecode(factory, "data"));
+            PsiElement digestVariable = factory.createVariableDeclarationStatement("digest", PsiType.BYTE.createArrayType(), digestExp);
+
+            //新增代码
+            cursorElement = parentElement.addAfter(saltVariable, cursorElement);
+            cursorElement = parentElement.addAfter(dataVariable, cursorElement);
+            cursorElement = parentElement.addAfter(mdVariable, cursorElement);
+            cursorElement = parentElement.addAfter(mdinit, cursorElement);
+            parentElement.addAfter(digestVariable, cursorElement);
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] input, Map<String, ?> params)
                 throws GeneralSecurityException {
+            CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
             java.security.MessageDigest instance = java.security.MessageDigest.getInstance(algorithm, provider);
+            StringValidate stringValidate = new StringValidate("salt", params.get("salt"));
+            if (stringValidate.isNotBlankNoEx()) {
+                instance.update(service.decode(CodecServiceImpl.IO.IN, stringValidate.get()));
+            }
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("output", instance.digest(input));
             return rs;

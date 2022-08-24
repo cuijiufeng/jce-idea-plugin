@@ -2,6 +2,8 @@ package cn.easyjce.plugin.service;
 
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.exception.OperationIllegalException;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementFactory;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -19,6 +21,10 @@ public interface IJceSpec {
 
     default List<Parameter<?>> params(String algorithm) {
         return Collections.emptyList();
+    }
+
+    default void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, ?> params) {
+        throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
 
     default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
