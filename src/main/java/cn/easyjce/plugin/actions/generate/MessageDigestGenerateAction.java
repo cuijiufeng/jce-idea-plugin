@@ -5,18 +5,19 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiType;
-import com.intellij.psi.PsiTypeElement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.testFramework.PsiTestUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -36,19 +37,19 @@ public class MessageDigestGenerateAction extends AnAction {
         //代码生成工厂
         PsiElementFactory factory = JavaPsiFacade.getInstance(event.getProject()).getElementFactory();
         PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
-        PsiElement cursorElement = psiJavaFile.findElementAt(event.getData(CommonDataKeys.EDITOR).getCaretModel().getOffset());
+        Editor editor = event.getData(CommonDataKeys.EDITOR);
+        PsiElement cursorElement = psiJavaFile.findElementAt(editor.getCaretModel().getOffset());
 
         //由于Intellij Platform不允许插件在主线程中进行实时的文件写入，只能通过异步任务来完成写入
         WriteCommandAction.runWriteCommandAction(event.getProject(), () -> {
             PsiElement parentElement = cursorElement.getParent();
-            //类声明
-            PsiClassType mdPsiClassType = factory.createTypeByFQClassName("java.security.MessageDigest");
-            PsiTypeElement mdPsiType = factory.createTypeElement(mdPsiClassType);
+            //类
+            PsiType mdPsiType = factory.createTypeFromText("java.security.MessageDigest", null);
 
             //生成instance实例
-            PsiExpression mdInstance = factory.createExpressionFromText("MessageDigest.getInstance(\"MD5\", \"SUN\")", mdPsiType);
-            PsiDeclarationStatement mdVariable = factory.createVariableDeclarationStatement("md", mdPsiClassType, mdInstance, mdPsiType);
-            PsiExpression mdInit = factory.createExpressionFromText("md.update(new byte[]{1})", null);
+            PsiExpression mdInstance = factory.createExpressionFromText("MessageDigest.getInstance(\"MD5\", \"SUN\")", null);
+            PsiDeclarationStatement mdVariable = factory.createVariableDeclarationStatement("md", mdPsiType, mdInstance);
+            PsiStatement mdInit = factory.createStatementFromText("md.update(new byte[]{1});", null);
             PsiExpression digestInit = factory.createExpressionFromText("md.digest(new byte[]{2})", null);
             PsiDeclarationStatement digestVariable = factory.createVariableDeclarationStatement("digest", PsiType.BYTE.createArrayType(), digestInit);
             //新增代码
@@ -60,6 +61,8 @@ public class MessageDigestGenerateAction extends AnAction {
             JavaCodeStyleManager.getInstance(event.getProject()).shortenClassReferences(parentElement);
             //格式化代码
             CodeStyleManager.getInstance(event.getProject()).reformat(parentElement);
+            //检查psi操作代码的正确
+            PsiTestUtil.checkFileStructure(psiFile);
         });
     }
 }
