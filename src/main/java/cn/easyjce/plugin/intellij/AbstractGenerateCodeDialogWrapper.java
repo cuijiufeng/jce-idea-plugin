@@ -23,6 +23,7 @@ import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -63,6 +64,9 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
         this.psiJavaFile = psiJavaFile;
         this.editor = editor;
 
+        this.inputJText.setLineWrap(true);
+        this.inputJText.setWrapStyleWord(true);
+
         this.initEvent();
         this.reloadProviderSelect(ServiceManager.getService(JceServiceImpl.class).getProviders());
     }
@@ -95,7 +99,7 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
         jPanel.add(algorithmSelect, new GBC(1, 1));
         jPanel.add(this.params, new GBC(0, 2, 2, 1));
         jPanel.add(new JBLabel("input:"), new GBC(0, 3, 2, 1));
-        jPanel.add(this.inputJText, new GBC(0, 4, 2, 1));
+        jPanel.add(new JBScrollPane(this.inputJText), new GBC(0, 4, 2, 1));
         return jPanel;
     }
 
