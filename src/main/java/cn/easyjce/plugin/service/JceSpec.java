@@ -87,8 +87,8 @@ public enum JceSpec implements IJceSpec {
         @Override
         public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, ?> params) {
             PsiElement parentElement = cursorElement.getParent();
+            boolean existSalt = new StringValidate("salt", params.get("salt")).isNotBlankNoEx();
 
-            //生成instance实例
             PsiElement saltVariable = factory.createVariableDeclarationStatement("salt",
                     factory.createTypeFromText(CommonClassNames.JAVA_LANG_STRING, null),
                     factory.createExpressionFromText("\"" + params.get("salt") + "\"", null));
@@ -100,20 +100,27 @@ public enum JceSpec implements IJceSpec {
                     factory.createExpressionFromText("MessageDigest.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
 
             PsiElement mdinit = factory.createStatementFromText("md.update(x);", null);
-            ((PsiMethodCallExpression) mdinit.getFirstChild()).getArgumentList().getChildren()[1]
-                    .replace(PsiElementUtil.genHexDecode(factory, "salt"));
+            PsiElementUtil.replaceMethodCallArgumentList((PsiMethodCallExpression) mdinit.getFirstChild(),
+                    PsiElementUtil.genHexDecode(factory, "salt"));
 
             PsiExpression digestExp = factory.createExpressionFromText("md.digest(x)", null);
-            ((PsiMethodCallExpression) digestExp).getArgumentList().getChildren()[1]
-                    .replace(PsiElementUtil.genHexDecode(factory, "data"));
+            PsiElementUtil.replaceMethodCallArgumentList((PsiMethodCallExpression) digestExp,
+                    PsiElementUtil.genHexDecode(factory, "data"));
             PsiElement digestVariable = factory.createVariableDeclarationStatement("digest", PsiType.BYTE.createArrayType(), digestExp);
 
-            //新增代码
-            cursorElement = parentElement.addAfter(saltVariable, cursorElement);
-            cursorElement = parentElement.addAfter(dataVariable, cursorElement);
-            cursorElement = parentElement.addAfter(mdVariable, cursorElement);
-            cursorElement = parentElement.addAfter(mdinit, cursorElement);
-            parentElement.addAfter(digestVariable, cursorElement);
+            if (existSalt) {
+                //新增代码
+                saltVariable = parentElement.addAfter(saltVariable, cursorElement);
+                dataVariable = parentElement.addAfter(dataVariable, saltVariable);
+                mdVariable = parentElement.addAfter(mdVariable, dataVariable);
+                mdinit = parentElement.addAfter(mdinit, mdVariable);
+                parentElement.addAfter(digestVariable, mdinit);
+            } else {
+                //新增代码
+                dataVariable = parentElement.addAfter(dataVariable, cursorElement);
+                mdVariable = parentElement.addAfter(mdVariable, dataVariable);
+                parentElement.addAfter(digestVariable, mdVariable);
+            }
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] input, Map<String, ?> params)
