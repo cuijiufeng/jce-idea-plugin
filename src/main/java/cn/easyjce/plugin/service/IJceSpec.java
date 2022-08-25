@@ -23,7 +23,7 @@ public interface IJceSpec {
         return Collections.emptyList();
     }
 
-    default void validateParams(String input, Map<String, String> params) {}
+    default void validateParams(String algorithm, String input, Map<String, String> params) {}
 
     default void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
         throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());

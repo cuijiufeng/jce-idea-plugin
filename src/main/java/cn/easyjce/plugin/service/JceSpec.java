@@ -9,7 +9,6 @@ import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.impl.CodecServiceImpl;
 import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.PsiElementUtil;
-import cn.easyjce.plugin.validate.ByteArrValidate;
 import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.psi.CommonClassNames;
@@ -18,6 +17,7 @@ import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiType;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -62,13 +62,14 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("length", null, () -> true));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("length", params.get("length")).isNotBlank().parseInt();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException {
             java.security.SecureRandom instance = java.security.SecureRandom.getInstance(algorithm, provider);
-            Integer length = new StringValidate("length", params.get("length"))
-                    .isNotBlank()
-                    .parseInt()
-                    .get();
+            int length = Integer.parseInt(params.get("length"));
             byte[] output = new byte[length];
             //生成随机数种子
             byte[] seed = instance.generateSeed(length);
@@ -87,7 +88,7 @@ public enum JceSpec implements IJceSpec {
         @Override
         public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement parentElement = cursorElement.getParent();
-            boolean existSalt = new StringValidate("salt", params.get("salt")).isNotBlankNoEx();
+            boolean existSalt = StringUtils.isNotBlank(params.get("salt"));
 
             PsiElement saltVariable = factory.createVariableDeclarationStatement("salt",
                     factory.createTypeFromText(CommonClassNames.JAVA_LANG_STRING, null),
@@ -127,9 +128,8 @@ public enum JceSpec implements IJceSpec {
                 throws GeneralSecurityException {
             CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
             java.security.MessageDigest instance = java.security.MessageDigest.getInstance(algorithm, provider);
-            StringValidate stringValidate = new StringValidate("salt", params.get("salt"));
-            if (stringValidate.isNotBlankNoEx()) {
-                instance.update(service.decode(CodecServiceImpl.IO.IN, stringValidate.get()));
+            if (StringUtils.isNotBlank(params.get("salt"))) {
+                instance.update(service.decode(CodecServiceImpl.IO.IN, params.get("salt")));
             }
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("output", instance.digest(input));
@@ -142,13 +142,14 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("key", null, () -> true));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("key", params.get("key")).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
             javax.crypto.Mac instance = javax.crypto.Mac.getInstance(algorithm, provider);
-            String keyParam = new StringValidate("key", params.get("key"))
-                    .isNotBlank()
-                    .get();
-            byte[] key = service.decode(CodecServiceImpl.IO.IN, keyParam);
+            byte[] key = service.decode(CodecServiceImpl.IO.IN, params.get("key"));
             instance.init(new SecretKeySpec(key, algorithm));
             instance.update(inputBytes);
             Map<String, Object> rs = new HashMap<>(2);
@@ -165,10 +166,8 @@ public enum JceSpec implements IJceSpec {
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             javax.crypto.KeyGenerator instance = javax.crypto.KeyGenerator.getInstance(algorithm, provider);
             SecretKey secretKey = instance.generateKey();
-            StringValidate stringValidate = new StringValidate("keysize", params.get("keysize"));
-            if (stringValidate.isNotBlankNoEx()) {
-                Integer keysize = stringValidate.parseInt().get();
-                instance.init(keysize);
+            if (StringUtils.isNotBlank(params.get("keysize"))) {
+                instance.init(Integer.parseInt(params.get("keysize")));
             }
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("key", secretKey.getEncoded());
@@ -176,6 +175,10 @@ public enum JceSpec implements IJceSpec {
         }
     },
     SecretKeyFactory {
+        @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("key", input).isNotBlank();
+        }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             SecretKey secretKey = parseSecretKey(algorithm, provider, inputBytes);
@@ -193,10 +196,8 @@ public enum JceSpec implements IJceSpec {
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException {
             java.security.KeyPairGenerator instance = java.security.KeyPairGenerator.getInstance(algorithm, provider);
-            StringValidate stringValidate = new StringValidate("keysize", params.get("keysize"));
-            if (stringValidate.isNotBlankNoEx()) {
-                Integer keysize = stringValidate.parseInt().get();
-                instance.initialize(keysize);
+            if (StringUtils.isNotBlank(params.get("keysize"))) {
+                instance.initialize(Integer.parseInt(params.get("keysize")));
             }
             KeyPair keyPair = instance.genKeyPair();
             PrivateKey privateKey = keyPair.getPrivate();
@@ -213,14 +214,17 @@ public enum JceSpec implements IJceSpec {
             return Arrays.asList(new JTextFieldParameter("private", null, () -> true), new JTextFieldParameter("public", null, () -> true));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("private", params.get("private")).isNotBlank();
+            new StringValidate("public", params.get("public")).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException {
             CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
-            String privateParam = new StringValidate("private", params.get("private")).isNotBlank().get();
-            byte[] priv = service.decode(CodecServiceImpl.IO.IN, privateParam);
+            byte[] priv = service.decode(CodecServiceImpl.IO.IN, params.get("private"));
             PrivateKey privateKey = parsePrivateKey(algorithm, provider, priv);
-            String publicParam = new StringValidate("public", params.get("public")).isNotBlank().get();
-            byte[] pub = service.decode(CodecServiceImpl.IO.IN, publicParam);
+            byte[] pub = service.decode(CodecServiceImpl.IO.IN, params.get("public"));
             PublicKey publicKey = parsePublicKey(algorithm, provider, pub);
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("private", privateKey);
@@ -239,36 +243,36 @@ public enum JceSpec implements IJceSpec {
                     new JTextFieldParameter("plain", null, () -> parameter.getValue().equals("verify")));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            String type = new StringValidate("type", params.get("type")).isNotBlank().in(Arrays.asList("sign", "verify")).get();
+            new StringValidate("input", input).isNotBlank();
+            if (params.get("type").equals("sign")) {
+                new StringValidate("private", params.get("private")).isNotBlank();
+            }
+            new StringValidate( "plain", params.get("plain")).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException {
             CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
             java.security.Signature instance = java.security.Signature.getInstance(algorithm, provider);
-            String type = new StringValidate("type", params.get("type"))
-                    .isNotBlank()
-                    .in(Arrays.asList("sign", "verify"))
-                    .get();
             Map<String, Object> rs = new HashMap<>(2);
-            if (type.equals("sign")) {
-                String privateParam = new StringValidate("private", params.get("private")).isNotBlank().get();
-                byte[] priv = service.decode(CodecServiceImpl.IO.IN, privateParam);
+            if (params.get("type").equals("sign")) {
+                byte[] priv = service.decode(CodecServiceImpl.IO.IN, params.get("private"));
                 instance.initSign(parsePrivateKey(algorithm.split("with")[1], provider, priv));
-                instance.update(new ByteArrValidate("input", inputBytes).isNotEmpty().get());
+                instance.update(inputBytes);
                 rs.put("output", instance.sign());
-            } else if (type.equals("verify")) {
-                StringValidate stringValidate = new StringValidate("public", params.get("public"));
-                if (stringValidate.isNotBlankNoEx()) {
-                    byte[] pub = service.decode(CodecServiceImpl.IO.IN, stringValidate.get());
+            } else if (params.get("type").equals("verify")) {
+                if (StringUtils.isNotBlank(params.get("public"))) {
+                    byte[] pub = service.decode(CodecServiceImpl.IO.IN, params.get("public"));
                     instance.initVerify(parsePublicKey(algorithm.split("with")[1], provider, pub));
-                } else if (new StringValidate("cert", params.get("cert")).isNotBlankNoEx()) {
+                } else if (StringUtils.isNotBlank(params.get("cert"))) {
                     throw new OperationIllegalException("unsupported cert");
                 } else {
                     throw new ParameterIllegalException("{0} parameter is empty", "cert、public");
                 }
-                String plain = new StringValidate( "plain", params.get("plain"))
-                        .isNotBlank()
-                        .get();
-                instance.update(service.decode(CodecServiceImpl.IO.IN, plain));
-                rs.put("output", instance.verify(new ByteArrValidate("input", inputBytes).isNotEmpty().get()));
+                instance.update(service.decode(CodecServiceImpl.IO.IN, params.get("plain")));
+                rs.put("output", instance.verify(inputBytes));
             }
             return rs;
         }
@@ -282,36 +286,34 @@ public enum JceSpec implements IJceSpec {
                     new JTextFieldParameter("nounce", null, () -> parameter.getValue().equals("symmetric encryption") || parameter.getValue().equals("symmetric decryption")));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("type", params.get("type")).isNotBlank()
+                    .in(Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"));
+            new StringValidate("key", params.get("key")).isNotBlank();
+            new StringValidate("input", input).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
             javax.crypto.Cipher instance = javax.crypto.Cipher.getInstance(algorithm, provider);
-            String type = new StringValidate("type", params.get("type"))
-                    .isNotBlank()
-                    .in(Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"))
-                    .get();
-            String keyParam = new StringValidate("key", params.get("key")).isNotBlank().get();
-            byte[] keyBytes = service.decode(CodecServiceImpl.IO.IN, keyParam);
-            if ("symmetric encryption".equals(type)) {
+            byte[] keyBytes = service.decode(CodecServiceImpl.IO.IN, params.get("key"));
+            if ("symmetric encryption".equals(params.get("type"))) {
                 SecretKey secretKey = new SecretKeySpec(keyBytes, algorithm.split("/")[0].split("_")[0]);
-                StringValidate nounceParam = new StringValidate("nounce", params.get("nounce"));
-                if (nounceParam.isNotBlankNoEx()) {
-                    instance.init(javax.crypto.Cipher.ENCRYPT_MODE,
-                            secretKey,
-                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, nounceParam.get())));
+                if (StringUtils.isNotBlank(params.get("nounce"))) {
+                    instance.init(javax.crypto.Cipher.ENCRYPT_MODE, secretKey,
+                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, params.get("nounce"))));
                 } else {
                     instance.init(javax.crypto.Cipher.ENCRYPT_MODE, secretKey);
                 }
-            } else if ("symmetric decryption".equals(type)) {
+            } else if ("symmetric decryption".equals(params.get("type"))) {
                 SecretKey secretKey = new SecretKeySpec(keyBytes, algorithm.split("/")[0].split("_")[0]);
-                StringValidate nounceParam = new StringValidate("nounce", params.get("nounce"));
-                if (nounceParam.isNotBlankNoEx()) {
-                    instance.init(javax.crypto.Cipher.DECRYPT_MODE,
-                            secretKey,
-                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, nounceParam.get())));
+                if (StringUtils.isNotBlank(params.get("nounce"))) {
+                    instance.init(javax.crypto.Cipher.DECRYPT_MODE, secretKey,
+                            new IvParameterSpec(service.decode(CodecServiceImpl.IO.IN, params.get("nounce"))));
                 } else {
                     instance.init(javax.crypto.Cipher.DECRYPT_MODE, secretKey);
                 }
-            } else if ("asymmetric encryption".equals(type)) {
+            } else if ("asymmetric encryption".equals(params.get("type"))) {
                 Key key;
                 try {
                     key = parsePublicKey(algorithm, provider, keyBytes);
@@ -319,7 +321,7 @@ public enum JceSpec implements IJceSpec {
                     key = parsePrivateKey(algorithm, provider, keyBytes);
                 }
                 instance.init(javax.crypto.Cipher.ENCRYPT_MODE, key);
-            } else if ("asymmetric decryption".equals(type)) {
+            } else if ("asymmetric decryption".equals(params.get("type"))) {
                 Key key;
                 try {
                     key = parsePublicKey(algorithm, provider, keyBytes);
@@ -328,7 +330,7 @@ public enum JceSpec implements IJceSpec {
                 }
                 instance.init(javax.crypto.Cipher.DECRYPT_MODE, key);
             }
-            instance.update(new ByteArrValidate("input", inputBytes).isNotEmpty().get());
+            instance.update(inputBytes);
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("output", instance.doFinal());
             return rs;
@@ -342,11 +344,14 @@ public enum JceSpec implements IJceSpec {
                     new JButtonParameter("jks", "choose file"));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("jks", params.get("jks")).isNotBlank();
+            new StringValidate("password", params.get("password")).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException, IOException {
-            String jksParam = new StringValidate("jks", params.get("jks")).isNotBlank().get();
-            String passParam = new StringValidate("password", params.get("password")).isNotBlank().get();
-            java.security.KeyStore instance = loadKeyStore(algorithm, provider, new FileInputStream(jksParam), passParam);
+            java.security.KeyStore instance = loadKeyStore(algorithm, provider, new FileInputStream(params.get("jks")), params.get("password"));
             Map<String, Object> rs = new HashMap<>(2);
             Enumeration<String> aliases = instance.aliases();
             while (aliases.hasMoreElements()) {
@@ -354,7 +359,7 @@ public enum JceSpec implements IJceSpec {
                 try {
                     rs.put(alias, instance.getEntry(alias, null));
                 } catch (UnrecoverableEntryException e) {
-                    rs.put(alias, instance.getEntry(alias, new KeyStore.PasswordProtection(passParam.toCharArray())));
+                    rs.put(alias, instance.getEntry(alias, new KeyStore.PasswordProtection(params.get("password").toCharArray())));
                 }
             }
             return rs;
@@ -381,6 +386,14 @@ public enum JceSpec implements IJceSpec {
                     new JTextFieldParameter("g", "please enter a hexadecimal number", () -> algorithm.equals("DSA")));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            if ("DSA".equals(algorithm)) {
+                new StringValidate("p", params.get("p")).isNotBlank();
+                new StringValidate("q", params.get("q")).isNotBlank();
+                new StringValidate("g", params.get("g")).isNotBlank();
+            }
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException, IOException {
             java.security.AlgorithmParameters instance = java.security.AlgorithmParameters.getInstance(algorithm, provider);
@@ -391,9 +404,9 @@ public enum JceSpec implements IJceSpec {
                 return rs;
             }
             if ("DSA".equals(algorithm)) {
-                BigInteger p = new BigInteger(new StringValidate("p", params.get("p")).isNotBlank().get(), 16);
-                BigInteger q = new BigInteger(new StringValidate("q", params.get("q")).isNotBlank().get(), 16);
-                BigInteger r = new BigInteger(new StringValidate("g", params.get("g")).isNotBlank().get(), 16);
+                BigInteger p = new BigInteger(params.get("p"), 16);
+                BigInteger q = new BigInteger(params.get("q"), 16);
+                BigInteger r = new BigInteger(params.get("g"), 16);
                 instance.init(new DSAParameterSpec(p, q, r));
             } else {
                 throw new OperationIllegalException("unsupported algorithm");
@@ -411,12 +424,15 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JButtonParameter("cert", "choose file"));
         }
         @Override
+        public void validateParams(String algorithm, String input, Map<String, String> params) {
+            new StringValidate("cert", params.get("cert")).isNotBlank();
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
                 throws GeneralSecurityException, IOException {
             java.security.cert.CertificateFactory instance = java.security.cert.CertificateFactory.getInstance(algorithm, provider);
-            String certParam = new StringValidate("cert", params.get("cert")).isNotBlank().get();
             Map<String, Object> rs = new HashMap<>(2);
-            rs.put("output", instance.generateCertificate(new FileInputStream(certParam)));
+            rs.put("output", instance.generateCertificate(new FileInputStream(params.get("cert"))));
             return rs;
         }
     },
@@ -435,8 +451,7 @@ public enum JceSpec implements IJceSpec {
 
     protected SecretKey parseSecretKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
         javax.crypto.SecretKeyFactory keyFactory = javax.crypto.SecretKeyFactory.getInstance(algorithm, provider);
-        byte[] key = new ByteArrValidate("key", bytes).isNotEmpty().get();
-        return keyFactory.generateSecret(new SecretKeySpec(key, algorithm));
+        return keyFactory.generateSecret(new SecretKeySpec(bytes, algorithm));
     }
 
     protected PrivateKey parsePrivateKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
@@ -447,8 +462,7 @@ public enum JceSpec implements IJceSpec {
             instance = java.security.KeyFactory.getInstance(algorithm);
             LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
         }
-        byte[] priv = new ByteArrValidate("private key", bytes).isNotEmpty().get();
-        return instance.generatePrivate(new PKCS8EncodedKeySpec(priv));
+        return instance.generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
 
     protected PublicKey parsePublicKey(String algorithm, Provider provider, byte[] bytes) throws GeneralSecurityException {
@@ -459,8 +473,7 @@ public enum JceSpec implements IJceSpec {
             instance = java.security.KeyFactory.getInstance(algorithm);
             LogUtil.LOG.info(e.getMessage() + "\nfind it in" + instance.getProvider().getName());
         }
-        byte[] pub = new ByteArrValidate("public key", bytes).isNotEmpty().get();
-        return instance.generatePublic(new X509EncodedKeySpec(pub));
+        return instance.generatePublic(new X509EncodedKeySpec(bytes));
     }
 
     protected KeyStore loadKeyStore(String algorithm, Provider provider, InputStream is, String password) throws GeneralSecurityException, IOException {

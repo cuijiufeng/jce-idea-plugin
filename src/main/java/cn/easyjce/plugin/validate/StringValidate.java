@@ -16,10 +16,6 @@ public class StringValidate extends AbstractValidate<String>{
         super(name, (String) param);
     }
 
-    public boolean isNotBlankNoEx() {
-        return StringUtils.isNotBlank(this.param);
-    }
-
     public StringValidate isNotBlank() {
         if (StringUtils.isBlank(param)) {
             throw new ParameterIllegalException("{0} parameter is empty", name);

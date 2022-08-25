@@ -102,8 +102,9 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
     @Override
     protected @Nullable ValidationInfo doValidate() {
         Map<String, String> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
+        AlgorithmCombo algorithmCombo = (AlgorithmCombo) algorithmSelect.getSelectedItem();
         try {
-            JCESPEC.validateParams(inputJText.getText(), paramsMap);
+            JCESPEC.validateParams(algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
         } catch (ParameterIllegalException e) {
             return new ValidationInfo(MessagesUtil.getI18nMessage(e.getMessage(), e.getMsgParams()), null);
         }
