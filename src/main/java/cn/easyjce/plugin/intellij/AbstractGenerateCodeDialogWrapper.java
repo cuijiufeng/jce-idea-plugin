@@ -4,14 +4,17 @@ import cn.easyjce.plugin.awt.GBC;
 import cn.easyjce.plugin.beans.AlgorithmCombo;
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.beans.ProviderCombo;
+import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
+import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
@@ -94,6 +97,17 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
         jPanel.add(new JBLabel("input:"), new GBC(0, 3, 2, 1));
         jPanel.add(this.inputJText, new GBC(0, 4, 2, 1));
         return jPanel;
+    }
+
+    @Override
+    protected @Nullable ValidationInfo doValidate() {
+        Map<String, ?> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
+        try {
+            JCESPEC.validateParams(inputJText.getText(), paramsMap);
+        } catch (ParameterIllegalException e) {
+            return new ValidationInfo(MessagesUtil.getI18nMessage(e.getMessage(), e.getMsgParams()), null);
+        }
+        return null;
     }
 
     @Override

@@ -85,6 +85,10 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("salt", null, () -> true));
         }
         @Override
+        public void validateParams(String input, Map<String, ?> paramsMap) {
+            throw new ParameterIllegalException("fkjdslf");
+        }
+        @Override
         public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, ?> params) {
             PsiElement parentElement = cursorElement.getParent();
             boolean existSalt = new StringValidate("salt", params.get("salt")).isNotBlankNoEx();

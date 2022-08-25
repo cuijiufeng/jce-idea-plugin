@@ -6,13 +6,9 @@ import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author cuijiufeng
@@ -27,19 +23,7 @@ public class MessageDigestGenerateAction extends AnAction {
         if (psiFile == null || !(psiFile.getFileType() instanceof JavaFileType)) {
             return;
         }
-        new MessageDigestGenerateGenerateCodeDialogWrapper(event.getProject(), (PsiJavaFile) psiFile, event.getData(CommonDataKeys.EDITOR))
-                .showAndGet();
-    }
-
-    static class MessageDigestGenerateGenerateCodeDialogWrapper extends AbstractGenerateCodeDialogWrapper {
-
-        public MessageDigestGenerateGenerateCodeDialogWrapper(Project project, PsiJavaFile psiJavaFile, Editor editor) {
-            super(JceSpec.MessageDigest, project, psiJavaFile, editor);
-        }
-
-        @Override
-        protected @Nullable ValidationInfo doValidate() {
-            return super.doValidate();
-        }
+        new AbstractGenerateCodeDialogWrapper(JceSpec.MessageDigest, event.getProject(), (PsiJavaFile) psiFile, event.getData(CommonDataKeys.EDITOR)){
+        }.showAndGet();
     }
 }
