@@ -48,7 +48,7 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
     protected final PsiJavaFile psiJavaFile;
     protected final Editor editor;
 
-    private List<Parameter<?>> paramsList = Collections.emptyList();
+    private List<Parameter> paramsList = Collections.emptyList();
     private final JPanel params = new JPanel(new BorderLayout());
     private final ComboBox<ProviderCombo> providerSelect = new ComboBox<>();
     private final ComboBox<AlgorithmCombo> algorithmSelect = new ComboBox<>();
@@ -101,7 +101,7 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
 
     @Override
     protected @Nullable ValidationInfo doValidate() {
-        Map<String, ?> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
+        Map<String, String> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
         try {
             JCESPEC.validateParams(inputJText.getText(), paramsMap);
         } catch (ParameterIllegalException e) {
@@ -119,7 +119,7 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
 
             ProviderCombo providerSelected = (ProviderCombo) providerSelect.getSelectedItem();
             AlgorithmCombo algorithmCombo = (AlgorithmCombo) algorithmSelect.getSelectedItem();
-            Map<String, ?> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
+            Map<String, String> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
             //参数1.代码生成工厂
             PsiElementFactory factory = JavaPsiFacade.getInstance(this.project).getElementFactory();
             //noinspection ConstantConditions
@@ -154,10 +154,10 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
                 .forEach(algorithmSelect::addItem);
     }
 
-    private void reviewParameterUI(List<Parameter<?>> paramsList) {
+    private void reviewParameterUI(List<Parameter> paramsList) {
         params.removeAll();
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
-        for (Parameter<?> parameter : paramsList) {
+        for (Parameter parameter : paramsList) {
             if (parameter.isShow()) {
                 JPanel jPanel = new JPanel(new GridBagLayout());
                 for (int j = 0; j < parameter.getComponent().size(); j++) {

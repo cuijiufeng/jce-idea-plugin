@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * @Date: 2022/8/12 16:10
  * @author: cuijiufeng
  */
-public class JRadioButtonParameter extends Parameter<String> {
+public class JRadioButtonParameter extends Parameter {
     private final List<JRadioButton> radioButtons;
 
     public JRadioButtonParameter(String label, List<String> rbText, int maxCol) {

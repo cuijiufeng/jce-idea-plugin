@@ -9,7 +9,7 @@ import java.util.function.BooleanSupplier;
  * @Date: 2022/7/28 9:08
  * @author: cuijiufeng
  */
-public abstract class Parameter<T> {
+public abstract class Parameter {
     private final String label;
     private final int maxRow;
     private final BooleanSupplier show;
@@ -24,7 +24,7 @@ public abstract class Parameter<T> {
         return this.label;
     }
 
-    public abstract T getValue();
+    public abstract String getValue();
 
     public abstract List<? extends JComponent> getComponent();
 

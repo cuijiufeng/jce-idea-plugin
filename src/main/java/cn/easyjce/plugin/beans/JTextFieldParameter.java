@@ -13,7 +13,7 @@ import java.util.function.BooleanSupplier;
  * @Date: 2022/8/12 16:09
  * @author: cuijiufeng
  */
-public class JTextFieldParameter extends Parameter<String> {
+public class JTextFieldParameter extends Parameter {
     private final JTextField textField;
 
     public JTextFieldParameter(String label, String tooltip, BooleanSupplier show) {

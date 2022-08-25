@@ -44,7 +44,7 @@ public class MainUI {
     private JTextArea output;
     private JSplitPane splitter;
     private JPanel params;
-    private List<Parameter<?>> paramsList = Collections.emptyList();
+    private List<Parameter> paramsList = Collections.emptyList();
 
     private MainUI() {
         initView();
@@ -141,7 +141,7 @@ public class MainUI {
                 TypeCombo typeSelected = (TypeCombo) typeSelect.getSelectedItem();
                 AlgorithmCombo algoSelected = (AlgorithmCombo) algorithmSelect.getSelectedItem();
                 //获取参数
-                Map<String, ?> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
+                Map<String, String> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
                 JceServiceImpl service = ServiceManager.getService(JceServiceImpl.class);
                 try {
                     //noinspection ConstantConditions
@@ -156,11 +156,11 @@ public class MainUI {
         service.addEventListener(ParameterUIEvent.class, event -> reviewParameterUI(this.paramsList));
     }
 
-    private void reviewParameterUI(List<Parameter<?>> paramsList) {
+    private void reviewParameterUI(List<Parameter> paramsList) {
         this.clear();
         params.removeAll();
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
-        for (Parameter<?> parameter : paramsList) {
+        for (Parameter parameter : paramsList) {
             if (parameter.isShow()) {
                 JPanel jPanel = new JPanel(new GridBagLayout());
                 for (int j = 0; j < parameter.getComponent().size(); j++) {

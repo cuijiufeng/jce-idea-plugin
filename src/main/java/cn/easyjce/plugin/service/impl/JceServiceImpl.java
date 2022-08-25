@@ -34,10 +34,11 @@ public final class JceServiceImpl {
         return Security.getProviders();
     }
 
-    public String execute(String type, String algorithm, Provider provider, String input, Map<String, ?> paramsMap) {
+    public String execute(String type, String algorithm, Provider provider, String input, Map<String, String> paramsMap) {
         CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
         try {
             JceSpec jceSpec = JceSpec.specValueOf(type, new OperationIllegalException("{0} is not supported", type));
+            jceSpec.validateParams(input, paramsMap);
             Map<String, Object> outputMap = jceSpec.executeInternal(algorithm, provider, service.decode(CodecServiceImpl.IO.IN, input), paramsMap);
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Object> entry : outputMap.entrySet()) {

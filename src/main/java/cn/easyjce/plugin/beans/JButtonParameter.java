@@ -16,7 +16,7 @@ import java.util.Objects;
  * @Date: 2022/8/12 16:41
  * @author: cuijiufeng
  */
-public class JButtonParameter extends Parameter<String> {
+public class JButtonParameter extends Parameter {
     private final JTextField textField;
     private final JButton button;
     private String filePath;

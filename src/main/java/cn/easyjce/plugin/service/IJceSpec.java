@@ -19,17 +19,17 @@ import java.util.Map;
  */
 public interface IJceSpec {
 
-    default List<Parameter<?>> params(String algorithm) {
+    default List<Parameter> params(String algorithm) {
         return Collections.emptyList();
     }
 
-    default void validateParams(String input, Map<String,?> paramsMap) {}
+    default void validateParams(String input, Map<String, String> params) {}
 
-    default void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, ?> params) {
+    default void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
         throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
 
-    default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, ?> params)
+    default Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
             throws GeneralSecurityException, IOException {
         throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
