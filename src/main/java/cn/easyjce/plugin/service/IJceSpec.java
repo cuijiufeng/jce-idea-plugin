@@ -4,6 +4,7 @@ import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.exception.OperationIllegalException;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.util.IncorrectOperationException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -25,7 +26,7 @@ public interface IJceSpec {
 
     default void validateParams(String algorithm, String input, Map<String, String> params) {}
 
-    default List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+    default List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
         throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
 

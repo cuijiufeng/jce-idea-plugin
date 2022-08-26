@@ -46,6 +46,7 @@
             <action class="cn.easyjce.plugin.actions.generate.KeyPairGeneratorGenerateAction" text="KeyPairGenerator"/>
             <action class="cn.easyjce.plugin.actions.generate.KeyFactoryGenerateAction" text="KeyFactory"/>
             <action class="cn.easyjce.plugin.actions.generate.SignatureGenerateAction" text="Signature"/>
+            <action class="cn.easyjce.plugin.actions.generate.CipherGenerateAction" text="Cipher"/>
         </group>
         <group id="jce.generate.action">
             <separator/>

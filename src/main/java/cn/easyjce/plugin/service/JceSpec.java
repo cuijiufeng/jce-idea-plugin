@@ -12,7 +12,9 @@ import cn.easyjce.plugin.validate.StringValidate;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiType;
+import com.intellij.util.IncorrectOperationException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.SecretKey;
@@ -31,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
@@ -62,7 +65,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("length", params.get("length")).isNotBlank().parseInt();
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement srVariable = factory.createVariableDeclarationStatement("sr",
                     factory.createTypeFromText("java.security.SecureRandom", null),
                     factory.createExpressionFromText("SecureRandom.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -99,7 +102,7 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("salt", null, () -> true));
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             boolean existSalt = StringUtils.isNotBlank(params.get("salt"));
 
             PsiElement mdVariable = factory.createVariableDeclarationStatement("md",
@@ -140,7 +143,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("key", params.get("key")).isNotBlank();
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement macVariable = factory.createVariableDeclarationStatement("mac",
                     factory.createTypeFromText("javax.crypto.Mac", null),
                     factory.createExpressionFromText("Mac.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -172,7 +175,7 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement kgVariable = factory.createVariableDeclarationStatement("kg",
                     factory.createTypeFromText("javax.crypto.KeyGenerator", null),
                     factory.createExpressionFromText("KeyGenerator.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -206,7 +209,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("key", input).isNotBlank();
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement skfVariable = factory.createVariableDeclarationStatement("skf",
                     factory.createTypeFromText("javax.crypto.SecretKeyFactory", null),
                     factory.createExpressionFromText("SecretKeyFactory.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -232,7 +235,7 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement kpgVariable = factory.createVariableDeclarationStatement("kpg",
                     factory.createTypeFromText("java.security.KeyPairGenerator", null),
                     factory.createExpressionFromText("KeyPairGenerator.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -280,7 +283,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("public", params.get("public")).isNotBlank();
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement kfVariable = factory.createVariableDeclarationStatement("kf",
                     factory.createTypeFromText("java.security.KeyFactory", null),
                     factory.createExpressionFromText("KeyFactory.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -331,7 +334,7 @@ public enum JceSpec implements IJceSpec {
             }
         }
         @Override
-        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
             PsiElement kfVariable = factory.createVariableDeclarationStatement("kf",
                     factory.createTypeFromText("java.security.KeyFactory", null),
                     factory.createExpressionFromText("KeyFactory.getInstance(\"" + algorithm.split("with")[1] + "\", \"" + provider + "\")", null));
@@ -405,6 +408,59 @@ public enum JceSpec implements IJceSpec {
                     .in(Arrays.asList("symmetric encryption", "symmetric decryption", "asymmetric encryption", "asymmetric decryption"));
             new StringValidate("key", params.get("key")).isNotBlank();
             new StringValidate("input", input).isNotBlank();
+        }
+        @Override
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) throws IncorrectOperationException {
+            CodecServiceImpl service = ServiceManager.getService(CodecServiceImpl.class);
+            //SecretKey
+            String keyDecodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("key") + "\")";
+            PsiElement skVariable = factory.createVariableDeclarationStatement("key",
+                    factory.createTypeFromText("java.security.Key", null),
+                    factory.createExpressionFromText("new javax.crypto.spec.SecretKeySpec(" + keyDecodeHexExp + ", \"" + algorithm.split("/")[0].split("_")[0] + "\")", null));
+
+            //public key, private key
+            PsiElement kfVariable = factory.createVariableDeclarationStatement("kf",
+                    factory.createTypeFromText("java.security.KeyFactory", null),
+                    factory.createExpressionFromText("KeyFactory.getInstance(\"" + algorithm + "\")", null));
+
+            PsiElement pubVariable = factory.createVariableDeclarationStatement("key",
+                    factory.createTypeFromText("java.security.Key", null),
+                    factory.createExpressionFromText("kf.generatePublic(new java.security.spec.X509EncodedKeySpec(" + keyDecodeHexExp + "))", null));
+            PsiElement privVariable = factory.createVariableDeclarationStatement("key",
+                    factory.createTypeFromText("java.security.Key", null),
+                    factory.createExpressionFromText("kf.generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(" + keyDecodeHexExp + "))", null));
+
+            PsiElement cipherVariable = factory.createVariableDeclarationStatement("cipher",
+                    factory.createTypeFromText("javax.crypto.Cipher", null),
+                    factory.createExpressionFromText("Cipher.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            String nounceExp = StringUtils.isNotBlank(params.get("nounce"))
+                    ? ", new javax.crypto.spec.IvParameterSpec(org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("nounce") + "\"))"
+                    : "";
+            String mode = "symmetric encryption".equals(params.get("type")) || "asymmetric encryption".equals(params.get("type"))
+                    ? "javax.crypto.Cipher.ENCRYPT_MODE"
+                    : "javax.crypto.Cipher.DECRYPT_MODE";
+            PsiStatement initExp = factory.createStatementFromText("cipher.init(" + mode + ", key" + nounceExp + ");", null);
+            PsiStatement updateExp = factory.createStatementFromText("cipher.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\"));", null);
+            PsiElement bytesVariable = factory.createVariableDeclarationStatement("bytes", PsiType.BYTE.createArrayType(),
+                    factory.createExpressionFromText("cipher.doFinal()", null));
+            //symmetric encryption
+            //symmetric decryption
+            if ("symmetric encryption".equals(params.get("type")) || "symmetric decryption".equals(params.get("type"))) {
+                return Arrays.asList(skVariable, cipherVariable, initExp, updateExp, bytesVariable);
+            }
+            //asymmetric encryption
+            //asymmetric decryption
+            try {
+                parsePublicKey(algorithm, Security.getProvider(provider), service.decode(CodecServiceImpl.IO.IN, params.get("key")));
+                return Arrays.asList(kfVariable, pubVariable, cipherVariable, initExp, updateExp, bytesVariable);
+            } catch (GeneralSecurityException e) {
+                try {
+                    parsePrivateKey(algorithm, Security.getProvider(provider), service.decode(CodecServiceImpl.IO.IN, params.get("key")));
+                    return Arrays.asList(kfVariable, privVariable, cipherVariable, initExp, updateExp, bytesVariable);
+                } catch (GeneralSecurityException ignore) { }
+            }
+            return Collections.emptyList();
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {

@@ -9,6 +9,7 @@ import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
+import cn.easyjce.plugin.utils.LogUtil;
 import cn.easyjce.plugin.utils.MessagesUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.components.ServiceManager;
@@ -27,6 +28,7 @@ import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nullable;
 
@@ -132,14 +134,18 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
             Map<String, String> paramsMap = paramsList.stream().collect(Collectors.toMap(Parameter::getKey, Parameter::getValue));
             //参数1.代码生成工厂
             PsiElementFactory factory = JavaPsiFacade.getInstance(this.project).getElementFactory();
-            //noinspection ConstantConditions
-            List<PsiElement> psiElements = JCESPEC.generateJceCode(factory, providerSelected.getName(),
-                    algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
+            try {
+                //noinspection ConstantConditions
+                List<PsiElement> psiElements = JCESPEC.generateJceCode(factory, providerSelected.getName(),
+                        algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
 
-            @SuppressWarnings("ConstantConditions")
-            PsiElement parentElement = cursorElement.getParent();
-            for (PsiElement psiElement : psiElements) {
-                cursorElement = parentElement.addAfter(psiElement, cursorElement);
+                @SuppressWarnings("ConstantConditions")
+                PsiElement parentElement = cursorElement.getParent();
+                for (PsiElement psiElement : psiElements) {
+                    cursorElement = parentElement.addAfter(psiElement, cursorElement);
+                }
+            } catch (IncorrectOperationException e) {
+                LogUtil.LOG.error(e.getMessage(), e);
             }
 
             //自动import导入
