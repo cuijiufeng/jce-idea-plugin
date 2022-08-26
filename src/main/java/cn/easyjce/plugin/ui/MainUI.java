@@ -157,7 +157,6 @@ public class MainUI {
     }
 
     private void reviewParameterUI(List<Parameter> paramsList) {
-        this.clear();
         params.removeAll();
         FormBuilder formBuilder = FormBuilder.createFormBuilder();
         for (Parameter parameter : paramsList) {
