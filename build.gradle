@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'cn.easyjce.plugin'
-version '1.0-SNAPSHOT'
+version '1.0-RELEASE'
 
 //编码
 sourceCompatibility = JavaVersion.VERSION_1_8
