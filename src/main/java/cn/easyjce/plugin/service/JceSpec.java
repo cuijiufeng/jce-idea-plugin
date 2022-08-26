@@ -79,7 +79,7 @@ public enum JceSpec implements IJceSpec {
             PsiElement setSeedExp = factory.createStatementFromText("sr.setSeed(seed);", null);
             PsiElement nextBytesExp = factory.createStatementFromText("sr.nextBytes(output);", null);
 
-            return Arrays.asList(seedVariable, outputVariable, seedVariable, setSeedExp, nextBytesExp);
+            return Arrays.asList(srVariable, outputVariable, seedVariable, setSeedExp, nextBytesExp);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
