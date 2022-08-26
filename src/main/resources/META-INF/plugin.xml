@@ -41,6 +41,8 @@
             <action class="cn.easyjce.plugin.actions.generate.SecureRandomGenerateAction" text="SecureRandom"/>
             <action class="cn.easyjce.plugin.actions.generate.MessageDigestGenerateAction" text="MessageDigest"/>
             <action class="cn.easyjce.plugin.actions.generate.MacGenerateAction" text="Mac"/>
+            <action class="cn.easyjce.plugin.actions.generate.KeyGeneratorGenerateAction" text="KeyGenerator"/>
+            <action class="cn.easyjce.plugin.actions.generate.SecretKeyFactoryGenerateAction" text="SecretKeyFactory"/>
         </group>
         <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="Generate Jce Code">
             <add-to-group group-id="GenerateGroup" anchor="last"/>

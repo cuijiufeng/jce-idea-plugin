@@ -62,9 +62,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("length", params.get("length")).isNotBlank().parseInt();
         }
         @Override
-        public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
-            PsiElement parentElement = cursorElement.getParent();
-
+        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement srVariable = factory.createVariableDeclarationStatement("sr",
                     factory.createTypeFromText("java.security.SecureRandom", null),
                     factory.createExpressionFromText("SecureRandom.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -78,11 +76,7 @@ public enum JceSpec implements IJceSpec {
             PsiElement setSeedExp = factory.createStatementFromText("sr.setSeed(seed);", null);
             PsiElement nextBytesExp = factory.createStatementFromText("sr.nextBytes(output);", null);
 
-            srVariable = parentElement.addAfter(srVariable, cursorElement);
-            outputVariable = parentElement.addAfter(outputVariable, srVariable);
-            seedVariable = parentElement.addAfter(seedVariable, outputVariable);
-            setSeedExp = parentElement.addAfter(setSeedExp, seedVariable);
-            parentElement.addAfter(nextBytesExp, setSeedExp);
+            return Arrays.asList(seedVariable, outputVariable, seedVariable, setSeedExp, nextBytesExp);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -105,29 +99,24 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("salt", null, () -> true));
         }
         @Override
-        public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
-            PsiElement parentElement = cursorElement.getParent();
+        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             boolean existSalt = StringUtils.isNotBlank(params.get("salt"));
 
             PsiElement mdVariable = factory.createVariableDeclarationStatement("md",
                     factory.createTypeFromText("java.security.MessageDigest", null),
                     factory.createExpressionFromText("MessageDigest.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
 
-            PsiElement mdinit = factory.createStatementFromText("md.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("salt") + "\"));", null);
+            PsiElement mdInit = factory.createStatementFromText("md.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("salt") + "\"));", null);
             PsiElement digestVariable = factory.createVariableDeclarationStatement("digest",
                     PsiType.BYTE.createArrayType(),
                     factory.createExpressionFromText("md.digest(org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\"))", null));
 
             if (existSalt) {
                 //新增代码
-                mdVariable = parentElement.addAfter(mdVariable, cursorElement);
-                mdinit = parentElement.addAfter(mdinit, mdVariable);
-                parentElement.addAfter(digestVariable, mdinit);
-            } else {
-                //新增代码
-                mdVariable = parentElement.addAfter(mdVariable, cursorElement);
-                parentElement.addAfter(digestVariable, mdVariable);
+                return Arrays.asList(mdVariable, mdInit, digestVariable);
             }
+            //新增代码
+            return Arrays.asList(mdVariable, digestVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] input, Map<String, String> params)
@@ -152,9 +141,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("key", params.get("key")).isNotBlank();
         }
         @Override
-        public void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
-            PsiElement parentElement = cursorElement.getParent();
-
+        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement macVariable = factory.createVariableDeclarationStatement("mac",
                     factory.createTypeFromText("javax.crypto.Mac", null),
                     factory.createExpressionFromText("Mac.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -166,10 +153,7 @@ public enum JceSpec implements IJceSpec {
                     PsiType.BYTE.createArrayType(),
                     factory.createExpressionFromText("mac.doFinal()", null));
 
-            macVariable = parentElement.addAfter(macVariable, cursorElement);
-            macInitExp = parentElement.addAfter(macInitExp, macVariable);
-            macUpdateExp = parentElement.addAfter(macUpdateExp, macInitExp);
-            parentElement.addAfter(bytesVariable, macUpdateExp);
+            return Arrays.asList(macVariable, macInitExp, macUpdateExp, bytesVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
@@ -189,12 +173,29 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
+        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+            PsiElement kgVariable = factory.createVariableDeclarationStatement("kg",
+                    factory.createTypeFromText("javax.crypto.KeyGenerator", null),
+                    factory.createExpressionFromText("KeyGenerator.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            PsiElement kgInit = factory.createStatementFromText("kg.init(" + params.get("keysize") + ");", null);
+
+            PsiElement skVariable = factory.createVariableDeclarationStatement("secretKey",
+                    factory.createTypeFromText("javax.crypto.SecretKey", null),
+                    factory.createExpressionFromText("kg.generateKey()", null));
+
+            if (StringUtils.isNotBlank(params.get("keysize"))) {
+                return Arrays.asList(kgVariable, kgInit, skVariable);
+            }
+            return Arrays.asList(kgVariable, skVariable);
+        }
+        @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {
             javax.crypto.KeyGenerator instance = javax.crypto.KeyGenerator.getInstance(algorithm, provider);
-            SecretKey secretKey = instance.generateKey();
             if (StringUtils.isNotBlank(params.get("keysize"))) {
                 instance.init(Integer.parseInt(params.get("keysize")));
             }
+            SecretKey secretKey = instance.generateKey();
             Map<String, Object> rs = new HashMap<>(2);
             rs.put("key", secretKey.getEncoded());
             return rs;
@@ -204,6 +205,19 @@ public enum JceSpec implements IJceSpec {
         @Override
         public void validateParams(String algorithm, String input, Map<String, String> params) {
             new StringValidate("key", input).isNotBlank();
+        }
+        @Override
+        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+            PsiElement skfVariable = factory.createVariableDeclarationStatement("skf",
+                    factory.createTypeFromText("javax.crypto.SecretKeyFactory", null),
+                    factory.createExpressionFromText("SecretKeyFactory.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            String decodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\")";
+            PsiElement skVariable = factory.createVariableDeclarationStatement("secretKey",
+                    factory.createTypeFromText("javax.crypto.SecretKey", null),
+                    factory.createExpressionFromText("skf.generateSecret(new javax.crypto.spec.SecretKeySpec(" + decodeHexExp + ", \"" + algorithm + "\"))", null));
+
+            return Arrays.asList(skfVariable, skVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params) throws GeneralSecurityException {

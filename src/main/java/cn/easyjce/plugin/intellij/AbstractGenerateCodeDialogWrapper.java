@@ -128,7 +128,14 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
             //参数1.代码生成工厂
             PsiElementFactory factory = JavaPsiFacade.getInstance(this.project).getElementFactory();
             //noinspection ConstantConditions
-            JCESPEC.generateJavaCode(factory, cursorElement, providerSelected.getName(), algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
+            List<PsiElement> psiElements = JCESPEC.generateJavaCode(factory, providerSelected.getName(),
+                    algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
+
+            @SuppressWarnings("ConstantConditions")
+            PsiElement parentElement = cursorElement.getParent();
+            for (PsiElement psiElement : psiElements) {
+                cursorElement = parentElement.addAfter(psiElement, cursorElement);
+            }
 
             //自动import导入
             JavaCodeStyleManager.getInstance(this.project).optimizeImports(this.psiJavaFile);

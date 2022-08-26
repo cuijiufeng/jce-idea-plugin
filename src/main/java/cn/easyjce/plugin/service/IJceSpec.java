@@ -25,7 +25,7 @@ public interface IJceSpec {
 
     default void validateParams(String algorithm, String input, Map<String, String> params) {}
 
-    default void generateJavaCode(PsiElementFactory factory, PsiElement cursorElement, String provider, String algorithm, String input, Map<String, String> params) {
+    default List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
         throw new OperationIllegalException("{0} is not supported", ((JceSpec) this).name());
     }
 
