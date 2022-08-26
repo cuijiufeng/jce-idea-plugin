@@ -32,7 +32,7 @@
         <!-- Add your actions here -->
         <group id="jce.toolbar">
             <action id="reset.action" class="cn.easyjce.plugin.actions.ResetAction"/>
-            <separator text="Separator"/>
+            <separator/>
             <action id="config.action" class="cn.easyjce.plugin.actions.ConfigAction"/>
             <action id="help.action" class="cn.easyjce.plugin.actions.HelpAction"/>
         </group>
@@ -43,9 +43,14 @@
             <action class="cn.easyjce.plugin.actions.generate.MacGenerateAction" text="Mac"/>
             <action class="cn.easyjce.plugin.actions.generate.KeyGeneratorGenerateAction" text="KeyGenerator"/>
             <action class="cn.easyjce.plugin.actions.generate.SecretKeyFactoryGenerateAction" text="SecretKeyFactory"/>
+            <action class="cn.easyjce.plugin.actions.generate.KeyPairGeneratorGenerateAction" text="KeyPairGenerator"/>
+            <action class="cn.easyjce.plugin.actions.generate.KeyFactoryGenerateAction" text="KeyFactory"/>
+            <action class="cn.easyjce.plugin.actions.generate.SignatureGenerateAction" text="Signature"/>
         </group>
-        <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="Generate Jce Code">
+        <group id="jce.generate.action">
+            <separator/>
+            <action id="generate.action" class="cn.easyjce.plugin.actions.GenerateCodeAction" text="Generate Jce Code"/>
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-        </action>
+        </group>
     </actions>
 </idea-plugin>

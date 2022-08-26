@@ -62,7 +62,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("length", params.get("length")).isNotBlank().parseInt();
         }
         @Override
-        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement srVariable = factory.createVariableDeclarationStatement("sr",
                     factory.createTypeFromText("java.security.SecureRandom", null),
                     factory.createExpressionFromText("SecureRandom.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -99,7 +99,7 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("salt", null, () -> true));
         }
         @Override
-        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             boolean existSalt = StringUtils.isNotBlank(params.get("salt"));
 
             PsiElement mdVariable = factory.createVariableDeclarationStatement("md",
@@ -107,8 +107,7 @@ public enum JceSpec implements IJceSpec {
                     factory.createExpressionFromText("MessageDigest.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
 
             PsiElement mdInit = factory.createStatementFromText("md.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("salt") + "\"));", null);
-            PsiElement digestVariable = factory.createVariableDeclarationStatement("digest",
-                    PsiType.BYTE.createArrayType(),
+            PsiElement digestVariable = factory.createVariableDeclarationStatement("digest", PsiType.BYTE.createArrayType(),
                     factory.createExpressionFromText("md.digest(org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\"))", null));
 
             if (existSalt) {
@@ -141,7 +140,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("key", params.get("key")).isNotBlank();
         }
         @Override
-        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement macVariable = factory.createVariableDeclarationStatement("mac",
                     factory.createTypeFromText("javax.crypto.Mac", null),
                     factory.createExpressionFromText("Mac.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -173,7 +172,7 @@ public enum JceSpec implements IJceSpec {
             return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
         }
         @Override
-        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement kgVariable = factory.createVariableDeclarationStatement("kg",
                     factory.createTypeFromText("javax.crypto.KeyGenerator", null),
                     factory.createExpressionFromText("KeyGenerator.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -207,7 +206,7 @@ public enum JceSpec implements IJceSpec {
             new StringValidate("key", input).isNotBlank();
         }
         @Override
-        public List<PsiElement> generateJavaCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
             PsiElement skfVariable = factory.createVariableDeclarationStatement("skf",
                     factory.createTypeFromText("javax.crypto.SecretKeyFactory", null),
                     factory.createExpressionFromText("SecretKeyFactory.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
@@ -231,6 +230,28 @@ public enum JceSpec implements IJceSpec {
         @Override
         public List<Parameter> params(String algorithm) {
             return Collections.singletonList(new JTextFieldParameter("keysize", null, () -> true));
+        }
+        @Override
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+            PsiElement kpgVariable = factory.createVariableDeclarationStatement("kpg",
+                    factory.createTypeFromText("java.security.KeyPairGenerator", null),
+                    factory.createExpressionFromText("KeyPairGenerator.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            PsiElement kpgInit = factory.createStatementFromText("kpg.initialize(" + params.get("keysize") + ");", null);
+
+            PsiElement kpVariable = factory.createVariableDeclarationStatement("kp",
+                    factory.createTypeFromText("java.security.KeyPair", null),
+                    factory.createExpressionFromText("kpg.genKeyPair()", null));
+            PsiElement pubVariable = factory.createVariableDeclarationStatement("publicKey",
+                    factory.createTypeFromText("java.security.PublicKey", null),
+                    factory.createExpressionFromText("kp.getPublic()", null));
+            PsiElement privVariable = factory.createVariableDeclarationStatement("privateKey",
+                    factory.createTypeFromText("java.security.PrivateKey", null),
+                    factory.createExpressionFromText("kp.getPrivate()", null));
+            if (StringUtils.isNotBlank(params.get("keysize"))) {
+                return Arrays.asList(kpgVariable, kpgInit, kpVariable, pubVariable, privVariable);
+            }
+            return Arrays.asList(kpgVariable, kpVariable, pubVariable, privVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -257,6 +278,22 @@ public enum JceSpec implements IJceSpec {
         public void validateParams(String algorithm, String input, Map<String, String> params) {
             new StringValidate("private", params.get("private")).isNotBlank();
             new StringValidate("public", params.get("public")).isNotBlank();
+        }
+        @Override
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+            PsiElement kfVariable = factory.createVariableDeclarationStatement("kf",
+                    factory.createTypeFromText("java.security.KeyFactory", null),
+                    factory.createExpressionFromText("KeyFactory.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+
+            String pubDecodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("public") + "\")";
+            PsiElement pubVariable = factory.createVariableDeclarationStatement("publicKey",
+                    factory.createTypeFromText("java.security.PublicKey", null),
+                    factory.createExpressionFromText("kf.generatePublic(new java.security.spec.X509EncodedKeySpec(" + pubDecodeHexExp + "))", null));
+            String privDecodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("private") + "\")";
+            PsiElement privVariable = factory.createVariableDeclarationStatement("privateKey",
+                    factory.createTypeFromText("java.security.PrivateKey", null),
+                    factory.createExpressionFromText("kf.generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(" + privDecodeHexExp + "))", null));
+            return Arrays.asList(kfVariable, pubVariable, privVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)
@@ -288,8 +325,45 @@ public enum JceSpec implements IJceSpec {
             String type = new StringValidate("type", params.get("type")).isNotBlank().in(Arrays.asList("sign", "verify")).get();
             if (params.get("type").equals("sign")) {
                 new StringValidate("private", params.get("private")).isNotBlank();
+            } else if (params.get("type").equals("verify")) {
+                new StringValidate("public", params.get("public")).isNotBlank();
+                new StringValidate( "plain", params.get("plain")).isNotBlank();
             }
-            new StringValidate( "plain", params.get("plain")).isNotBlank();
+        }
+        @Override
+        public List<PsiElement> generateJceCode(PsiElementFactory factory, String provider, String algorithm, String input, Map<String, String> params) {
+            PsiElement kfVariable = factory.createVariableDeclarationStatement("kf",
+                    factory.createTypeFromText("java.security.KeyFactory", null),
+                    factory.createExpressionFromText("KeyFactory.getInstance(\"" + algorithm.split("with")[1] + "\", \"" + provider + "\")", null));
+
+            String pubDecodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("public") + "\")";
+            PsiElement pubVariable = factory.createVariableDeclarationStatement("publicKey",
+                    factory.createTypeFromText("java.security.PublicKey", null),
+                    factory.createExpressionFromText("kf.generatePublic(new java.security.spec.X509EncodedKeySpec(" + pubDecodeHexExp + "))", null));
+            String privDecodeHexExp = "org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("private") + "\")";
+            PsiElement privVariable = factory.createVariableDeclarationStatement("privateKey",
+                    factory.createTypeFromText("java.security.PrivateKey", null),
+                    factory.createExpressionFromText("kf.generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(" + privDecodeHexExp + "))", null));
+
+            PsiElement signatureVariable = factory.createVariableDeclarationStatement("signature",
+                    factory.createTypeFromText("java.security.Signature", null),
+                    factory.createExpressionFromText("Signature.getInstance(\"" + algorithm + "\", \"" + provider + "\")", null));
+            //签名
+            PsiElement signInit = factory.createStatementFromText("signature.initSign(privateKey);", null);
+            PsiElement signUpdate = factory.createStatementFromText("signature.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\"));", null);
+
+            PsiElement signVariable = factory.createVariableDeclarationStatement("sign", PsiType.BYTE.createArrayType(),
+                    factory.createExpressionFromText("signature.sign()", null));
+            //验签
+            PsiElement verifyInit = factory.createStatementFromText("signature.initVerify(publicKey);", null);
+            PsiElement verifyUpdate = factory.createStatementFromText("signature.update(org.apache.commons.codec.binary.Hex.decodeHex(\"" + params.get("plain") + "\"));", null);
+
+            PsiElement verifyVariable = factory.createVariableDeclarationStatement("verify", PsiType.BOOLEAN,
+                    factory.createExpressionFromText("signature.verify(org.apache.commons.codec.binary.Hex.decodeHex(\"" + input + "\"))", null));
+            if (params.get("type").equals("sign")) {
+                return Arrays.asList(kfVariable, privVariable, signatureVariable, signInit, signUpdate, signVariable);
+            }
+            return Arrays.asList(kfVariable, pubVariable, signatureVariable, verifyInit, verifyUpdate, verifyVariable);
         }
         @Override
         public Map<String, Object> executeInternal(String algorithm, Provider provider, byte[] inputBytes, Map<String, String> params)

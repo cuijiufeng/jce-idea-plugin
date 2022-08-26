@@ -4,6 +4,8 @@ import cn.easyjce.plugin.awt.GBC;
 import cn.easyjce.plugin.beans.AlgorithmCombo;
 import cn.easyjce.plugin.beans.Parameter;
 import cn.easyjce.plugin.beans.ProviderCombo;
+import cn.easyjce.plugin.event.DialogWrapperParameterUIEvent;
+import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.exception.ParameterIllegalException;
 import cn.easyjce.plugin.service.JceSpec;
 import cn.easyjce.plugin.service.impl.JceServiceImpl;
@@ -84,6 +86,9 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
                 reviewParameterUI(this.paramsList = JCESPEC.params(item.getAlgorithm()));
             }
         });
+        //当选择不同参数，整个参数UI重新绘制
+        EventPublisher service = ServiceManager.getService(EventPublisher.class);
+        service.addEventListener(DialogWrapperParameterUIEvent.class, event -> reviewParameterUI(this.paramsList));
     }
 
     @Override
@@ -128,7 +133,7 @@ public abstract class AbstractGenerateCodeDialogWrapper extends DialogWrapper {
             //参数1.代码生成工厂
             PsiElementFactory factory = JavaPsiFacade.getInstance(this.project).getElementFactory();
             //noinspection ConstantConditions
-            List<PsiElement> psiElements = JCESPEC.generateJavaCode(factory, providerSelected.getName(),
+            List<PsiElement> psiElements = JCESPEC.generateJceCode(factory, providerSelected.getName(),
                     algorithmCombo.getAlgorithm(), inputJText.getText(), paramsMap);
 
             @SuppressWarnings("ConstantConditions")

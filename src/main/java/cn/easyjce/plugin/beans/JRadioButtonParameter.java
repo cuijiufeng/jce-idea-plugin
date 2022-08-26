@@ -1,5 +1,6 @@
 package cn.easyjce.plugin.beans;
 
+import cn.easyjce.plugin.event.DialogWrapperParameterUIEvent;
 import cn.easyjce.plugin.event.EventPublisher;
 import cn.easyjce.plugin.event.ParameterUIEvent;
 import com.intellij.openapi.components.ServiceManager;
@@ -29,6 +30,7 @@ public class JRadioButtonParameter extends Parameter {
                 if (ItemEvent.SELECTED == e.getStateChange()) {
                     //当选择不同参数，整个参数UI重新绘制，并交换show与hide
                     service.publishEvent(new ParameterUIEvent(this));
+                    service.publishEvent(new DialogWrapperParameterUIEvent(this));
                 }
             });
         }
