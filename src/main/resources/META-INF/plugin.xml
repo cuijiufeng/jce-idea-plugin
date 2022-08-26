@@ -3,6 +3,15 @@
     <name>JCE</name>
     <vendor email="1310639453@qq.com" url="https://github.com/cuijiufeng">personal</vendor>
 
+    <!--变动的内容-->
+    <change-notes>
+        <![CDATA[
+        ----------------------------------------<br/>
+        v1.0
+        ----------------------------------------<br/>
+        ]]>
+    </change-notes>
+
     <description>
         <![CDATA[
         ========================================<br/>
